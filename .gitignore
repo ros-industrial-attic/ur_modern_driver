@@ -4,3 +4,37 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 *~
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build Folder
+build/*
+xcodebuild/*
+build2/*
+xcodebuild2/*

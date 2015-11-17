@@ -17,6 +17,7 @@
  */
 
 #include "ur_modern_driver/robot_state.h"
+#include "ur_modern_driver/portable_endian.h"
 
 RobotState::RobotState(std::condition_variable& msg_cond) {
 	version_msg_.major_version = 0;

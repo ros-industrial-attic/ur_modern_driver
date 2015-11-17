@@ -52,6 +52,10 @@ void print_fatal(std::string inp) {
 	ros::shutdown();
 #else
 	printf("FATAL: %s\n", inp.c_str());
+#ifndef __APPLE__
 	exit(1);
+#else
+    _exit(1);
+#endif
 #endif
 }
