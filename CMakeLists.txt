@@ -158,7 +158,10 @@ if (CATKIN_IS_BUILT)
       CATKIN_DEPENDS hardware_interface controller_manager actionlib control_msgs geometry_msgs roscpp sensor_msgs trajectory_msgs ur_msgs
       DEPENDS ur_hardware_interface
     )
+elseif (CATKIN_IS_BUILT)
 
+    find_package(Boost)
+    include_directories(${Boost_INCLUDE_DIRS})
 endif (CATKIN_IS_BUILT)
 
 ## Declare a C++ executable
@@ -167,10 +170,16 @@ set(${PROJECT_NAME}_SOURCES
     src/ur_communication.cpp
     src/robot_state.cpp
     src/robot_state_RT.cpp
-    src/do_output.cpp)
+    src/do_output.cpp
+    src/ur_driver.cpp)
 add_library(ur_driver ${${PROJECT_NAME}_SOURCES})
 
-add_executable(ur_driver_standalone src/ur_driver_standalone.cpp)
+if(ros_control_FOUND)
+  # todo: consider adding https://github.com/ros-controls/ros_control
+  # it can be modified quite easily to not require ros
+  #include_directories(ros_control/hardware_interface/include)  
+  add_executable(ur_driver_standalone src/ur_hardware_interface_standalone.cpp)
+endif(ros_control_FOUND)
 
 if(CATKIN_IS_BUILT)
 
@@ -200,7 +209,6 @@ if(CATKIN_IS_BUILT)
     
     add_executable(ur_driver_ros 
         src/ur_ros_wrapper.cpp
-        src/ur_driver.cpp
     )
     
     target_link_libraries(ur_driver_ros ur_driver)

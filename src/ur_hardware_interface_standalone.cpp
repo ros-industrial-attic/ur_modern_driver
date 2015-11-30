@@ -17,7 +17,7 @@
  */
 
 #include "ur_modern_driver/ur_driver.h"
-//#include "ur_modern_driver/ur_hardware_interface.h"
+#include "ur_modern_driver/ur_hardware_interface.h"
 #include "ur_modern_driver/do_output.h"
 #include <string.h>
 #include <vector>
