@@ -9,7 +9,7 @@
 #
 # Additionaly you can use the following varaibles:
 #
-#  UR_MODERN_DRIVER_FOUND   	    - standard CMake Package found indicator
+#  ur_modern_driver_FOUND   	 - standard CMake Package found indicator
 #  UR_MODERN_DRIVER_INCLUDE_DIR  - include directories for ur_modern_driver alone
 #  UR_MODERN_DRIVER_INCLUDE_DIRS - include directories for ur_modern_driver with all dpendencies
 #  UR_MODERN_DRIVER_DEFINITIONS  - Definitions needed to build with ur_modern_driver
