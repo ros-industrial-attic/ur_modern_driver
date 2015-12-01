@@ -45,7 +45,9 @@ set(${PROJECT_NAME}_SOURCES
     src/robot_state.cpp
     src/robot_state_RT.cpp
     src/do_output.cpp
-    src/ur_driver.cpp)
+    src/ur_driver.cpp
+    src/ur_hardware_interface_standalone.cpp
+)
     
 set(${PROJECT_NAME}_HEADERS
     include/ur_modern_driver/do_output.h
@@ -55,6 +57,7 @@ set(${PROJECT_NAME}_HEADERS
     include/ur_modern_driver/ur_communication.h
     include/ur_modern_driver/ur_driver.h
     include/ur_modern_driver/ur_hardware_interface.h
+    include/ur_modern_driver/ur_hardware_interface_standalone.h
     include/ur_modern_driver/ur_realtime_communication.h
 )
 
