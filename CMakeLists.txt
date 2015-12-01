@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ur_modern_driver)
+project(ur_modern_driver C CXX)
 
 
 #
@@ -35,10 +35,32 @@ else()
 endif()
 #
 
-include_directories(include)
+
+
+
+## Declare a C++ executable
+set(${PROJECT_NAME}_SOURCES
+    src/ur_realtime_communication.cpp
+    src/ur_communication.cpp
+    src/robot_state.cpp
+    src/robot_state_RT.cpp
+    src/do_output.cpp
+    src/ur_driver.cpp)
+    
+set(${PROJECT_NAME}_HEADERS
+    include/ur_modern_driver/do_output.h
+    include/ur_modern_driver/portable_endian.h
+    include/ur_modern_driver/robot_state.h
+    include/ur_modern_driver/robot_state_RT.h
+    include/ur_modern_driver/ur_communication.h
+    include/ur_modern_driver/ur_driver.h
+    include/ur_modern_driver/ur_hardware_interface.h
+    include/ur_modern_driver/ur_realtime_communication.h
+)
 
 # Destination for CMake package config files
 if (CATKIN_IS_BUILT)
+  include_directories(include)
   # Output directories
   set (PACKAGE_CONFIG_DIRECTORY "${CATKIN_DEVEL_PREFIX}/cmake")
   set (EXECUTABLE_OUTPUT_PATH "${CATKIN_DEVEL_PREFIX}/bin")
@@ -158,30 +180,6 @@ if (CATKIN_IS_BUILT)
       CATKIN_DEPENDS hardware_interface controller_manager actionlib control_msgs geometry_msgs roscpp sensor_msgs trajectory_msgs ur_msgs
       DEPENDS ur_hardware_interface
     )
-elseif (CATKIN_IS_BUILT)
-
-    find_package(Boost)
-    include_directories(${Boost_INCLUDE_DIRS})
-endif (CATKIN_IS_BUILT)
-
-## Declare a C++ executable
-set(${PROJECT_NAME}_SOURCES
-    src/ur_realtime_communication.cpp
-    src/ur_communication.cpp
-    src/robot_state.cpp
-    src/robot_state_RT.cpp
-    src/do_output.cpp
-    src/ur_driver.cpp)
-add_library(ur_driver ${${PROJECT_NAME}_SOURCES})
-
-if(ros_control_FOUND)
-  # todo: consider adding https://github.com/ros-controls/ros_control
-  # it can be modified quite easily to not require ros
-  #include_directories(ros_control/hardware_interface/include)  
-  add_executable(ur_driver_standalone src/ur_hardware_interface_standalone.cpp)
-endif(ros_control_FOUND)
-
-if(CATKIN_IS_BUILT)
 
     #
     # ###########
@@ -206,6 +204,8 @@ if(CATKIN_IS_BUILT)
     target_link_libraries(ur_hardware_interface_ros
       ${catkin_LIBRARIES}
     )
+
+    add_library(ur_driver ${${PROJECT_NAME}_SOURCES})
     
     add_executable(ur_driver_ros 
         src/ur_ros_wrapper.cpp
@@ -260,4 +260,97 @@ if(CATKIN_IS_BUILT)
     ## Add folders to be run by python nosetests
     catkin_add_nosetests(test)
 
+else (CATKIN_IS_BUILT)
+
+    ########################################################################
+    ######################## Standard CMake Build ##########################
+    ########################################################################
+
+    ########################### Misc. Configs ##############################
+    # Add custom cmake files folder
+    SET (PROJECT_CMAKE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+    # This sets where to look for modules (e.g. "Find*.cmake" files)
+    SET (CMAKE_MODULE_PATH "${PROJECT_CMAKE_DIR}" "${CMAKE_MODULE_PATH}" )
+
+    # Add custom Install Settings
+    INCLUDE(InstallSettings)
+    
+
+    find_package(Boost)
+
+    if(ros_control_FOUND)
+      # todo: consider adding https://github.com/ros-controls/ros_control
+      # it can be modified quite easily to not require ros
+      #include_directories(ros_control/hardware_interface/include)  
+      add_executable(ur_driver_standalone src/ur_hardware_interface_standalone.cpp)
+    endif(ros_control_FOUND)
+    
+
+
+    ################ Installation project target ################
+
+    set(TARGET_NAME ${PROJECT_NAME})
+    add_custom_target(${TARGET_NAME} ALL)
+    include(GenerateExportHeader)
+    
+    ######################### Add Primary Targets ##########################
+    #ADD_SUBDIRECTORY(src)
+
+    add_library(ur_driver
+        ${${PROJECT_NAME}_SOURCES}
+        ${${PROJECT_NAME}_HEADERS}
+      )
+
+    add_dependencies(${TARGET_NAME} ur_driver)
+
+    target_include_directories(ur_driver PRIVATE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>  # <prefix>/include
+    )
+    target_include_directories(ur_driver PRIVATE ${Boost_INCLUDE_DIRS} )
+
+    ######################### Installation Stuff ###########################
+    include(GenerateExportHeader)
+    generate_export_header(ur_driver)
+
+    install(TARGETS ur_driver
+      EXPORT ${TARGET_NAME}Targets
+      RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+      LIBRARY DESTINATION ${INSTALL_LIB_DIR}
+      ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+      INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}
+    )
+
+    install(
+      FILES
+        ${${PROJECT_NAME}_HEADERS}
+      DESTINATION
+        ${INSTALL_INCLUDE_DIR}
+      COMPONENT
+        Devel
+    )
+
+    ########################## Add the Examples ############################
+    # OPTION (BUILD_EXAMPLES "Build Examples" ON)
+    # IF(BUILD_EXAMPLES)
+    #   ADD_SUBDIRECTORY(examples)
+    # ENDIF()
+
+    ######################### Installation Stuff ###########################
+    INCLUDE(InstallProjectConfig)
+
+    ###################### Add uninstall target ############################
+    ADD_CUSTOM_TARGET(uninstall
+      COMMAND ${CMAKE_COMMAND} -P ${PROJECT_CMAKE_DIR}/cmake_uninstall.cmake)
+
+    ##################### Show Configuration Summary ######################
+    MESSAGE(STATUS "===============================================================")
+    MESSAGE(STATUS "================  Configuration Summary  ======================")
+    MESSAGE(STATUS "Project Name:       ${PROJECT_NAME}")
+    MESSAGE(STATUS "Build type:         ${CMAKE_BUILD_TYPE}")
+    MESSAGE(STATUS "Build type Flags:   ${CMAKE_BUILD_TYPE_FLAGS}")
+    MESSAGE(STATUS "C++ compile flags:  ${CMAKE_CXX_FLAGS}")
+    MESSAGE(STATUS "Install Path:       ${CMAKE_INSTALL_PREFIX}")
+    MESSAGE(STATUS "Build Examples:     ${BUILD_EXAMPLES}")
 endif(CATKIN_IS_BUILT)
+
