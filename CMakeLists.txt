@@ -312,9 +312,14 @@ else (CATKIN_IS_BUILT)
     )
     target_include_directories(ur_driver PRIVATE ${Boost_INCLUDE_DIRS} )
 
+    ########################## Add the Examples ############################
+    # OPTION (BUILD_EXAMPLES "Build Examples" ON)
+    # IF(BUILD_EXAMPLES)
+    #   ADD_SUBDIRECTORY(examples)
+    # ENDIF()
+    
+
     ######################### Installation Stuff ###########################
-    include(GenerateExportHeader)
-    generate_export_header(ur_driver)
 
     install(TARGETS ur_driver
       EXPORT ${TARGET_NAME}Targets
@@ -333,12 +338,9 @@ else (CATKIN_IS_BUILT)
         Devel
     )
 
-    ########################## Add the Examples ############################
-    # OPTION (BUILD_EXAMPLES "Build Examples" ON)
-    # IF(BUILD_EXAMPLES)
-    #   ADD_SUBDIRECTORY(examples)
-    # ENDIF()
 
+    include(GenerateExportHeader)
+    generate_export_header(ur_driver)
     ######################### Installation Stuff ###########################
     INCLUDE(InstallProjectConfig)
 
