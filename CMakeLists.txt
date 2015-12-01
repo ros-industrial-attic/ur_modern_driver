@@ -35,7 +35,9 @@ else()
 endif()
 #
 
-
+if(UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64") 
+	ADD_DEFINITIONS(-fPIC)
+endif(UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
 
 
 ## Declare a C++ executable
