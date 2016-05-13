@@ -92,11 +92,11 @@ std::vector<double> RobotStateRT::unpackVector(uint8_t * buf, int start_index,
 	return ret;
 }
 
-std::vector<bool> RobotStateRT::unpackDigitalInputBits(int64_t data) {
+std::vector<bool> RobotStateRT::unpackDigitalBits(int64_t data) {
 	std::vector<bool> ret;
-	for (int i = 0; i < 64; i++) {
-		ret.push_back((data & (1 << i)) >> i);
-	}
+    for (int i = 0; i < 8; i++) {
+        ret.push_back((data & (1 << i)) >> i);
+    }
 	return ret;
 }
 
@@ -225,6 +225,13 @@ std::vector<bool> RobotStateRT::getDigitalInputBits() {
 	val_lock_.unlock();
 	return ret;
 }
+std::vector<bool> RobotStateRT::getDigitalOutputBits() {
+    std::vector<bool> ret;
+    val_lock_.lock();
+    ret = digital_output_bits_;
+    val_lock_.unlock();
+    return ret;
+}
 std::vector<double> RobotStateRT::getMotorTemperatures() {
 	std::vector<double> ret;
 	val_lock_.lock();
@@ -309,8 +316,16 @@ std::vector<double> RobotStateRT::getVActual() {
 	val_lock_.unlock();
 	return ret;
 }
+double RobotStateRT::getProgramState() {
+    double ret;
+    val_lock_.lock();
+    ret = program_state_;
+    val_lock_.unlock();
+    return ret;
+}
 void RobotStateRT::unpack(uint8_t * buf) {
-	int64_t digital_input_bits;
+    int64_t digital_input_bits;
+    int64_t digital_ouput_bits;
 	uint64_t unpack_to;
 	uint16_t offset = 0;
 	val_lock_.lock();
@@ -337,7 +352,7 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	} else if (version_ >= 3.2 && version_ < 3.3) { //v3.2
 		if (len != 1060)
 			len_good = false;
-	}
+    }
 
 	if (!len_good) {
 		printf("Wrong length of message on RT interface: %i\n", len);
@@ -389,7 +404,7 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	offset += sizeof(double) * 6;
 
 	memcpy(&digital_input_bits, &buf[offset], sizeof(digital_input_bits));
-	digital_input_bits_ = unpackDigitalInputBits(be64toh(digital_input_bits));
+    digital_input_bits_ = unpackDigitalBits(ntohd(digital_input_bits));
 	offset += sizeof(double);
 	motor_temperatures_ = unpackVector(buf, offset, 6);
 	offset += sizeof(double) * 6;
@@ -409,14 +424,18 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 		safety_mode_ = ntohd(unpack_to);
 		offset += sizeof(double);
+        offset += sizeof(double) * 6; // Used by Universal Robots software only
 		tool_accelerometer_values_ = unpackVector(buf, offset, 3);
 		offset += sizeof(double) * 3;
+        offset += sizeof(double) * 6; // Used by Universal Robots software only
 		memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 		speed_scaling_ = ntohd(unpack_to);
 		offset += sizeof(double);
 		memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 		linear_momentum_norm_ = ntohd(unpack_to);
 		offset += sizeof(double);
+        offset += sizeof(double); // Used by Universal Robots software only
+        offset += sizeof(double); // Used by Universal Robots software only
 		memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 		v_main_ = ntohd(unpack_to);
 		offset += sizeof(double);
@@ -427,7 +446,15 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		i_robot_ = ntohd(unpack_to);
 		offset += sizeof(double);
 		v_actual_ = unpackVector(buf, offset, 6);
-	}
+    }
+    if (version_ >= 3.2) {
+        offset += sizeof(double) * 6;
+        memcpy(&digital_ouput_bits, &buf[offset], sizeof(digital_ouput_bits));
+        digital_output_bits_ = unpackDigitalBits(ntohd(digital_ouput_bits));
+        offset += sizeof(double);
+        memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
+        program_state_ = ntohd(unpack_to);
+    }
 	val_lock_.unlock();
 	controller_updated_ = true;
 	data_published_ = true;

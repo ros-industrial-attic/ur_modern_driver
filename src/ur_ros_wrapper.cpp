@@ -580,6 +580,8 @@ private:
 				"joint_states", 1);
 		ros::Publisher wrench_pub = nh_.advertise<geometry_msgs::WrenchStamped>(
 				"wrench", 1);
+        ros::Publisher io_pub_rt = nh_.advertise<ur_msgs::IOStates>(
+                "ur_driver/io_states_rt", 1);
         ros::Publisher tool_vel_pub = nh_.advertise<geometry_msgs::TwistStamped>("tool_velocity", 1);
         static tf::TransformBroadcaster br;
 		while (ros::ok()) {
@@ -647,6 +649,34 @@ private:
             tool_twist.twist.angular.y = tcp_speed[4];
             tool_twist.twist.angular.z = tcp_speed[5];
             tool_vel_pub.publish(tool_twist);
+
+            std::vector<bool> din = robot_.rt_interface_->robot_state_->getDigitalInputBits();
+
+            ur_msgs::IOStates io_msg_rt;
+            unsigned int pin = 0;
+            for (std::vector<bool>::iterator it = din.begin(); it != din.end(); ++it)
+            {
+                ur_msgs::Digital digi;
+                digi.pin = pin;
+                digi.state = *it;
+                io_msg_rt.digital_in_states.push_back(digi);
+                pin++;
+            }
+            // From version 3.2, realtime interface has digital output pins
+            if (robot_.sec_interface_->robot_state_->getVersion() >= 3.2)
+            {
+                std::vector<bool> dout = robot_.rt_interface_->robot_state_->getDigitalOutputBits();
+                pin = 0;
+                for (std::vector<bool>::iterator it = dout.begin(); it != dout.end(); ++it)
+                {
+                    ur_msgs::Digital digi;
+                    digi.pin = pin;
+                    digi.state = *it;
+                    io_msg_rt.digital_out_states.push_back(digi);
+                    pin++;
+                }
+            }
+            io_pub_rt.publish(io_msg_rt);
 
 			robot_.rt_interface_->robot_state_->setDataPublished();
 		}

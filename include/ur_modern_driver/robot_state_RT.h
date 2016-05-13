@@ -46,8 +46,8 @@ private:
 	std::vector<double> tcp_force_; //Generalised forces in the TC
 	std::vector<double> tool_vector_target_; //Target Cartesian coordinates of the tool: (x,y,z,rx,ry,rz), where rx, ry and rz is a rotation vector representation of the tool orientation
 	std::vector<double> tcp_speed_target_; //Target speed of the tool given in Cartesian coordinates
-	std::vector<bool> digital_input_bits_; //Current state of the digital inputs. NOTE: these are bits encoded as int64_t, e.g. a value of 5 corresponds to bit 0 and bit 2 set high
-	std::vector<double> motor_temperatures_; //Temperature of each joint in degrees celsius
+    std::vector<bool> digital_input_bits_; //Current state of the digital inputs. NOTE: these are bits encoded as int64_t, e.g. a value of 5 corresponds to bit 0 and bit 2 set high
+    std::vector<double> motor_temperatures_; //Temperature of each joint in degrees celsius
 	double controller_timer_; //Controller realtime thread execution time
 	double robot_mode_; //Robot mode
 	std::vector<double> joint_modes_; //Joint control modes
@@ -59,6 +59,8 @@ private:
 	double v_robot_; //Matorborad: Robot voltage (48V)
 	double i_robot_; //Masterboard: Robot current
 	std::vector<double> v_actual_; //Actual joint voltages
+    std::vector<bool> digital_output_bits_; //Digital outputs (similar to digital input bits)
+    double program_state_; //Program state
 
 	std::mutex val_lock_; // Locks the variables while unpack parses data;
 
@@ -68,7 +70,7 @@ private:
 
 	std::vector<double> unpackVector(uint8_t * buf, int start_index,
 			int nr_of_vals);
-	std::vector<bool> unpackDigitalInputBits(int64_t data);
+    std::vector<bool> unpackDigitalBits(int64_t data);
 	double ntohd(uint64_t nf);
 
 public:
@@ -91,6 +93,7 @@ public:
 	std::vector<double> getToolVectorTarget();
 	std::vector<double> getTcpSpeedTarget();
 	std::vector<bool> getDigitalInputBits();
+    std::vector<bool> getDigitalOutputBits();
 	std::vector<double> getMotorTemperatures();
 	double getControllerTimer();
 	double getRobotMode();
@@ -102,6 +105,7 @@ public:
 	double getVMain();
 	double getVRobot();
 	double getIRobot();
+    double getProgramState();
 
 	void setVersion(double ver);
 
