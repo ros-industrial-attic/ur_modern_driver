@@ -63,9 +63,7 @@ protected:
 	ros::NodeHandle nh_;
 	actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> as_;
 	actionlib::ServerGoalHandle<control_msgs::FollowJointTrajectoryAction> goal_handle_;
-	bool has_goal_;
-	control_msgs::FollowJointTrajectoryFeedback feedback_;
-	control_msgs::FollowJointTrajectoryResult result_;
+
 	ros::Subscriber speed_sub_;
 	ros::Subscriber urscript_sub_;
 	ros::ServiceServer io_srv_;
@@ -81,6 +79,12 @@ protected:
 	std::thread* ros_control_thread_;
 	boost::shared_ptr<ros_control_ur::UrHardwareInterface> hardware_interface_;
 	boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
+
+	std::mutex goal_mutex_;
+	bool has_goal_;
+	std::thread traj_thread_;
+	control_msgs::FollowJointTrajectoryFeedback feedback_;
+	control_msgs::FollowJointTrajectoryResult result_;
 
 public:
 	RosWrapper(std::string host, int reverse_port) :
@@ -227,6 +231,9 @@ private:
 			std::vector<std::vector<double> > velocities) {
 
 		robot_.doTraj(timestamps, positions, velocities);
+
+		std::unique_lock<std::mutex> lock(goal_mutex_);
+
 		if (has_goal_) {
 			result_.error_code = result_.SUCCESSFUL;
 			goal_handle_.setSucceeded(result_);
@@ -283,11 +290,22 @@ private:
 
 		actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction>::Goal goal =
 				*gh.getGoal(); //make a copy that we can modify
+
+		std::unique_lock<std::mutex> lock(goal_mutex_);
 		if (has_goal_) {
 			print_warning(
 					"Received new goal while still executing previous trajectory. Canceling previous trajectory");
 			has_goal_ = false;
-			robot_.stopTraj();
+
+			{
+				lock.unlock();
+
+				robot_.stopTraj();
+				traj_thread_.join();
+
+				lock.lock();
+			}
+
 			result_.error_code = -100; //nothing is defined for this...?
 			result_.error_string = "Received another trajectory";
 			goal_handle_.setAborted(result_, result_.error_string);
@@ -373,21 +391,32 @@ private:
 
 		goal_handle_.setAccepted();
 		has_goal_ = true;
-		std::thread(&RosWrapper::trajThread, this, timestamps, positions,
-				velocities).detach();
+		traj_thread_ = std::thread(&RosWrapper::trajThread, this, timestamps, positions,
+			velocities);
 	}
 
 	void cancelCB(
 			actionlib::ServerGoalHandle<
 					control_msgs::FollowJointTrajectoryAction> gh) {
 		// set the action state to preempted
+
+		std::unique_lock<std::mutex> lock(goal_mutex_);
+
 		print_info("on_cancel");
 		if (has_goal_) {
 			if (gh == goal_handle_) {
-				robot_.stopTraj();
+				has_goal_ = false;
+
+				{
+					lock.unlock();
+					robot_.stopTraj();
+					traj_thread_.join();
+					lock.lock();
+				}
 				has_goal_ = false;
 			}
 		}
+
 		result_.error_code = -100; //nothing is defined for this...?
 		result_.error_string = "Goal cancelled by client";
 		gh.setCanceled(result_);
