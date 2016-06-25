@@ -80,6 +80,9 @@ protected:
 	boost::shared_ptr<ros_control_ur::UrHardwareInterface> hardware_interface_;
 	boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
+	// Thread semantics:
+	//  cancelCB and goalCB are both executed with locked action server mutex.
+
 	std::mutex goal_mutex_;
 	bool has_goal_;
 	std::thread traj_thread_;
@@ -226,20 +229,22 @@ public:
 
 	}
 private:
-	void trajThread(std::vector<double> timestamps,
+	void trajThread(
+			std::vector<double> timestamps,
 			std::vector<std::vector<double> > positions,
-			std::vector<std::vector<double> > velocities) {
+			std::vector<std::vector<double> > velocities)
+	{
+		bool finished = robot_.doTraj(timestamps, positions, velocities);
 
-		robot_.doTraj(timestamps, positions, velocities);
-
-		std::unique_lock<std::mutex> lock(goal_mutex_);
-
-		if (has_goal_) {
+		if (finished)
+		{
+			std::unique_lock<std::mutex> lock(goal_mutex_);
 			result_.error_code = result_.SUCCESSFUL;
 			goal_handle_.setSucceeded(result_);
 			has_goal_ = false;
 		}
 	}
+
 	void goalCB(
 			actionlib::ServerGoalHandle<
 					control_msgs::FollowJointTrajectoryAction> gh) {
@@ -291,26 +296,26 @@ private:
 		actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction>::Goal goal =
 				*gh.getGoal(); //make a copy that we can modify
 
-		std::unique_lock<std::mutex> lock(goal_mutex_);
-		if (has_goal_) {
-			print_warning(
-					"Received new goal while still executing previous trajectory. Canceling previous trajectory");
-			has_goal_ = false;
-
-			{
-				lock.unlock();
-
+		{
+			std::unique_lock<std::mutex> lock(goal_mutex_);
+			if (has_goal_) {
+				print_warning(
+						"Received new goal while still executing previous trajectory. Canceling previous trajectory");
+				has_goal_ = false;
 				robot_.stopTraj();
-				traj_thread_.join();
 
-				lock.lock();
+				result_.error_code = -100; //nothing is defined for this...?
+				result_.error_string = "Received another trajectory";
+				goal_handle_.setAborted(result_, result_.error_string);
+				std::this_thread::sleep_for(std::chrono::milliseconds(250));
 			}
-
-			result_.error_code = -100; //nothing is defined for this...?
-			result_.error_string = "Received another trajectory";
-			goal_handle_.setAborted(result_, result_.error_string);
-			std::this_thread::sleep_for(std::chrono::milliseconds(250));
 		}
+
+		if(traj_thread_.joinable())
+			traj_thread_.join();
+
+		std::unique_lock<std::mutex> lock(goal_mutex_);
+
 		goal_handle_ = gh;
 		if (!validateJointNames()) {
 			std::string outp_joint_names = "";
@@ -406,14 +411,7 @@ private:
 		if (has_goal_) {
 			if (gh == goal_handle_) {
 				has_goal_ = false;
-
-				{
-					lock.unlock();
-					robot_.stopTraj();
-					traj_thread_.join();
-					lock.lock();
-				}
-				has_goal_ = false;
+				robot_.stopTraj();
 			}
 		}
 

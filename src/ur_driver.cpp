@@ -112,7 +112,11 @@ bool UrDriver::doTraj(std::vector<double> inp_timestamps,
 	executing_traj_ = false;
 	//Signal robot to stop driverProg()
 	UrDriver::closeServo(positions);
-	return true;
+
+	if(inp_timestamps[inp_timestamps.size() - 1] < std::chrono::duration_cast<std::chrono::duration<double>>(t - t0).count())
+		return true;
+	else
+		return false;
 }
 
 void UrDriver::servoj(std::vector<double> positions, int keepalive) {
