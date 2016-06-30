@@ -81,13 +81,18 @@ protected:
 	boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
 	// Thread semantics:
-	//  cancelCB and goalCB are both executed with locked action server mutex.
+	// * cancelCB and goalCB can be called simultaneously by the action server.
+	//   We prevent that by locking the as_mutex_.
+	// * The has_goal_ variable is protected by the goal_mutex_, as it is
+	//   accessed by trajThread() and the callbacks.
 
 	std::mutex goal_mutex_;
 	bool has_goal_;
 	std::thread traj_thread_;
 	control_msgs::FollowJointTrajectoryFeedback feedback_;
 	control_msgs::FollowJointTrajectoryResult result_;
+
+	std::mutex as_mutex_;
 
 public:
 	RosWrapper(std::string host, int reverse_port) :
@@ -248,6 +253,9 @@ private:
 	void goalCB(
 			actionlib::ServerGoalHandle<
 					control_msgs::FollowJointTrajectoryAction> gh) {
+
+		std::unique_lock<std::mutex> asLock(as_mutex_);
+
 		std::string buf;
 		print_info("on_goal");
 		if (!robot_.sec_interface_->robot_state_->isReady()) {
@@ -405,6 +413,7 @@ private:
 					control_msgs::FollowJointTrajectoryAction> gh) {
 		// set the action state to preempted
 
+		std::unique_lock<std::mutex> asLock(as_mutex_);
 		std::unique_lock<std::mutex> lock(goal_mutex_);
 
 		print_info("on_cancel");
