@@ -675,8 +675,8 @@ private:
                     io_msg_rt.digital_out_states.push_back(digi);
                     pin++;
                 }
+                io_pub_rt.publish(io_msg_rt);
             }
-            io_pub_rt.publish(io_msg_rt);
 
 			robot_.rt_interface_->robot_state_->setDataPublished();
 		}
