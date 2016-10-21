@@ -123,12 +123,10 @@ def main():
     global client
     try:
         rospy.init_node("test_move", anonymous=True, disable_signals=True)
-<<<<<<< HEAD
-        client = actionlib.SimpleActionClient('/Kinect2_Target_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
-=======
+
         #client = actionlib.SimpleActionClient('/Kinect2_Target_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
-        client = actionlib.SimpleActionClient('/neck/follow_joint_trajectory', FollowJointTrajectoryAction)
->>>>>>> master
+	client = actionlib.SimpleActionClient('/neck/follow_joint_trajectory', FollowJointTrajectoryAction)
+
         print "Waiting for server..."
         client.wait_for_server()
         print "Connected to server"
