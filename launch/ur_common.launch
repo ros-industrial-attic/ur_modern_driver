@@ -19,11 +19,15 @@
   <!-- The max_velocity parameter is only used for debugging in the ur_driver. It's not related to actual velocity limits -->
   <arg name="max_velocity" default="10.0"/> <!-- [rad/s] -->
 
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
 
   <!-- driver -->
+<<<<<<< HEAD
   <node name="ur_driver" pkg="ur_modern_driver" type="ur_driver" output="screen">
   <remap from="/joint_states" to="/neck/joint_states"/>
+=======
+  <!--<node name="ur_driver" pkg="ur_modern_driver" type="ur_driver" output="screen">-->
+>>>>>>> master
   <!-- copy the specified IP address to be consistant with ROS-Industrial spec. -->
     <param name="prefix" type="str" value="$(arg prefix)" />
     <param name="robot_ip_address" type="str" value="$(arg robot_ip)" />
