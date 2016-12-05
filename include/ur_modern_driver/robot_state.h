@@ -153,59 +153,60 @@ private:
 	version_message version_msg_;
 	masterboard_data mb_data_;
 	robot_mode_data robot_mode_;
-
+	
 	std::recursive_mutex val_lock_; // Locks the variables while unpack parses data;
-
+	
 	std::condition_variable* pMsg_cond_; //Signals that new vars are available
 	bool new_data_available_; //to avoid spurious wakes
 	unsigned char robot_mode_running_;
-
+	
 	double ntohd(uint64_t nf);
-
+	template <typename T> void unpackVariable(const uint8_t *buffer, unsigned int& offset, T& dest);
+	
 public:
 	RobotState(std::condition_variable& msg_cond);
 	~RobotState();
 	double getVersion();
-	double getTime();
+	double getTime() const;
 	std::vector<double> getQTarget();
-	int getDigitalInputBits();
-	int getDigitalOutputBits();
-	char getAnalogInputRange0();
-	char getAnalogInputRange1();
-	double getAnalogInput0();
-	double getAnalogInput1();
-	char getAnalogOutputDomain0();
-	char getAnalogOutputDomain1();
-	double getAnalogOutput0();
-	double getAnalogOutput1();
+	int getDigitalInputBits() const;
+	int getDigitalOutputBits() const;
+	char getAnalogInputRange0() const;
+	char getAnalogInputRange1() const;
+	double getAnalogInput0() const;
+	double getAnalogInput1() const;
+	char getAnalogOutputDomain0() const;
+	char getAnalogOutputDomain1() const;
+	double getAnalogOutput0() const;
+	double getAnalogOutput1() const;
 	std::vector<double> getVActual();
-	float getMasterBoardTemperature();
-	float getRobotVoltage48V();
-	float getRobotCurrent();
-	float getMasterIOCurrent();
-	unsigned char getSafetyMode();
-	unsigned char getInReducedMode();
-	char getEuromap67InterfaceInstalled();
-	int getEuromapInputBits();
-	int getEuromapOutputBits();
-	float getEuromapVoltage();
-	float getEuromapCurrent();
-
-	bool isRobotConnected();
-	bool isRealRobotEnabled();
-	bool isPowerOnRobot();
-	bool isEmergencyStopped();
-	bool isProtectiveStopped();
-	bool isProgramRunning();
-	bool isProgramPaused();
-	unsigned char getRobotMode();
-	bool isReady();
-
+	float getMasterBoardTemperature() const;
+	float getRobotVoltage48V() const;
+	float getRobotCurrent() const;
+	float getMasterIOCurrent() const;
+	unsigned char getSafetyMode() const;
+	unsigned char getInReducedMode() const;
+	char getEuromap67InterfaceInstalled() const;
+	int getEuromapInputBits() const;
+	int getEuromapOutputBits() const;
+	float getEuromapVoltage() const;
+	float getEuromapCurrent() const;
+	
+	bool isRobotConnected() const;
+	bool isRealRobotEnabled() const;
+	bool isPowerOnRobot() const;
+	bool isEmergencyStopped() const;
+	bool isProtectiveStopped() const;
+	bool isProgramRunning() const;
+	bool isProgramPaused() const;
+	unsigned char getRobotMode() const;
+	bool isReady() const;
+	
 	void setDisconnected();
-
-	bool getNewDataAvailable();
+	
+	bool getNewDataAvailable() const;
 	void finishedReading();
-
+	
 	void unpack(uint8_t * buf, unsigned int buf_length);
 	void unpackRobotMessage(uint8_t * buf, unsigned int offset, uint32_t len);
 	void unpackRobotMessageVersion(uint8_t * buf, unsigned int offset,
@@ -213,6 +214,54 @@ public:
 	void unpackRobotState(uint8_t * buf, unsigned int offset, uint32_t len);
 	void unpackRobotStateMasterboard(uint8_t * buf, unsigned int offset);
 	void unpackRobotMode(uint8_t * buf, unsigned int offset);
+	
 };
+
+
+template <typename T> inline
+void RobotState::unpackVariable(const uint8_t *buffer, unsigned int& offset, T& dest)
+{
+	static_assert(sizeof(T) == 1, "this template specialization requires size(T) == 1");
+	memcpy(&dest, &buffer[offset], sizeof(dest));
+	offset += sizeof(dest);
+}
+
+template <> inline
+void RobotState::unpackVariable<bool>(const uint8_t *buffer, unsigned int& offset, bool& dest)
+{
+	uint8_t temp;
+	memcpy(&temp, &buffer[offset], sizeof(temp));
+	offset += sizeof(temp);
+	dest = (temp != 0);
+}
+
+template <> inline
+void RobotState::unpackVariable<float>(const uint8_t *buffer, unsigned int& offset, float& dest){
+	memcpy(&dest, &buffer[offset], sizeof(dest));
+	offset += sizeof(dest);
+	dest = ntohl(dest);
+}
+
+template <> inline
+void RobotState::unpackVariable<int16_t>(const uint8_t *buffer, unsigned int& offset, int16_t& dest){
+	memcpy(&dest, &buffer[offset], sizeof(dest));
+	offset += sizeof(dest);
+	dest = ntohs(dest);
+}
+
+template <> inline
+void RobotState::unpackVariable<int>(const uint8_t *buffer, unsigned int& offset, int& dest){
+	memcpy(&dest, &buffer[offset], sizeof(dest));
+	offset += sizeof(dest);
+	dest = ntohl(dest);
+}
+
+template <> inline
+void RobotState::unpackVariable<double>(const uint8_t *buffer, unsigned int& offset, double& dest){
+	memcpy(&dest, &buffer[offset], sizeof(dest));
+	offset += sizeof(dest);
+	dest = RobotState::ntohd(dest);
+}
+
 
 #endif /* ROBOT_STATE_H_ */
