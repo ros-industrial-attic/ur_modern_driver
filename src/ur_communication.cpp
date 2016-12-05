@@ -19,7 +19,7 @@
 #include "ur_modern_driver/ur_communication.h"
 
 UrCommunication::UrCommunication(std::condition_variable& msg_cond,
-		std::string host) {
+    const std::string &host) {
 	robot_state_ = new RobotState(msg_cond);
 	bzero((char *) &pri_serv_addr_, sizeof(pri_serv_addr_));
 	bzero((char *) &sec_serv_addr_, sizeof(sec_serv_addr_));

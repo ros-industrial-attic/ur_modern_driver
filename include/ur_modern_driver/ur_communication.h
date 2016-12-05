@@ -55,7 +55,7 @@ public:
 	bool connected_;
 	RobotState* robot_state_;
 
-	UrCommunication(std::condition_variable& msg_cond, std::string host);
+  UrCommunication(std::condition_variable& msg_cond, const std::string& host);
 	bool start();
 	void halt();
 

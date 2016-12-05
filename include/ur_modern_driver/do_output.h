@@ -24,11 +24,11 @@
 #endif
 #include <string>
 
-void print_debug(std::string inp);
-void print_info(std::string inp);
-void print_warning(std::string inp);
-void print_error(std::string inp);
-void print_fatal(std::string inp);
+void print_debug(const std::string& inp);
+void print_info(const std::string &inp);
+void print_warning(const std::string& inp);
+void print_error(const std::string &inp);
+void print_fatal(const std::string& inp);
 
 
 #endif /* UR_DO_OUTPUT_H_ */

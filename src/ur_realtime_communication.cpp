@@ -188,6 +188,6 @@ void UrRealtimeCommunication::setSafetyCountMax(uint inp) {
 	safety_count_max_ = inp;
 }
 
-std::string UrRealtimeCommunication::getLocalIp() {
+const std::string& UrRealtimeCommunication::getLocalIp() const {
 	return local_ip_;
 }

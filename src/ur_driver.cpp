@@ -59,10 +59,10 @@ UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 }
 
 std::vector<double> UrDriver::interp_cubic(double t, double T,
-		std::vector<double> p0_pos, std::vector<double> p1_pos,
-		std::vector<double> p0_vel, std::vector<double> p1_vel) {
+    const std::vector<double> p0_pos, const std::vector<double> &p1_pos,
+    const std::vector<double> p0_vel, const std::vector<double> &p1_vel) const {
 	/*Returns positions of the joints at time 't' */
-	std::vector<double> positions;
+  std::vector<double> positions(p0_pos.size());
 	for (unsigned int i = 0; i < p0_pos.size(); i++) {
 		double a = p0_pos[i];
 		double b = p0_vel[i];
@@ -70,14 +70,14 @@ std::vector<double> UrDriver::interp_cubic(double t, double T,
 				- T * p1_vel[i]) / pow(T, 2);
 		double d = (2 * p0_pos[i] - 2 * p1_pos[i] + T * p0_vel[i]
 				+ T * p1_vel[i]) / pow(T, 3);
-		positions.push_back(a + b * t + c * pow(t, 2) + d * pow(t, 3));
+    positions[i] =(a + b * t + c * pow(t, 2) + d * pow(t, 3));
 	}
 	return positions;
 }
 
-bool UrDriver::doTraj(std::vector<double> inp_timestamps,
-		std::vector<std::vector<double> > inp_positions,
-		std::vector<std::vector<double> > inp_velocities) {
+bool UrDriver::doTraj(const std::vector<double> &inp_timestamps,
+    const std::vector<std::vector<double> > &inp_positions,
+    const std::vector<std::vector<double> > &inp_velocities) {
 	std::chrono::high_resolution_clock::time_point t0, t;
 	std::vector<double> positions;
 	unsigned int j;
@@ -115,7 +115,7 @@ bool UrDriver::doTraj(std::vector<double> inp_timestamps,
 	return true;
 }
 
-void UrDriver::servoj(std::vector<double> positions, int keepalive) {
+void UrDriver::servoj(const std::vector<double>& positions, int keepalive) {
 	if (!reverse_connected_) {
 		print_error(
 				"UrDriver::servoj called without a reverse connection present. Keepalive: "
@@ -235,7 +235,7 @@ bool UrDriver::openServo() {
 	reverse_connected_ = true;
 	return true;
 }
-void UrDriver::closeServo(std::vector<double> positions) {
+void UrDriver::closeServo(const std::vector<double>& positions) {
 	if (positions.size() != 6)
 		UrDriver::servoj(rt_interface_->robot_state_->getQActual(), 0);
 	else
@@ -274,11 +274,11 @@ void UrDriver::setSpeed(double q0, double q1, double q2, double q3, double q4,
 	rt_interface_->setSpeed(q0, q1, q2, q3, q4, q5, acc);
 }
 
-std::vector<std::string> UrDriver::getJointNames() {
+const std::vector<std::string> &UrDriver::getJointNames() const {
 	return joint_names_;
 }
 
-void UrDriver::setJointNames(std::vector<std::string> jn) {
+void UrDriver::setJointNames(const std::vector<std::string> &jn) {
 	joint_names_ = jn;
 }
 
