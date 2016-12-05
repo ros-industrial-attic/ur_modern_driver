@@ -26,12 +26,13 @@
 #include <mutex>
 #include <netinet/in.h>
 #include <condition_variable>
+#include <atomic>
 
 class RobotStateRT {
 private:
-	double version_; //protocol version
+  std::atomic<double> version_; //protocol version
 
-	double time_; //Time elapsed since the controller was started
+  std::atomic<double> time_; //Time elapsed since the controller was started
 	std::vector<double> q_target_; //Target joint positions
 	std::vector<double> qd_target_; //Target joint velocities
 	std::vector<double> qdd_target_; //Target joint accelerations
@@ -48,16 +49,16 @@ private:
 	std::vector<double> tcp_speed_target_; //Target speed of the tool given in Cartesian coordinates
 	std::vector<bool> digital_input_bits_; //Current state of the digital inputs. NOTE: these are bits encoded as int64_t, e.g. a value of 5 corresponds to bit 0 and bit 2 set high
 	std::vector<double> motor_temperatures_; //Temperature of each joint in degrees celsius
-	double controller_timer_; //Controller realtime thread execution time
-	double robot_mode_; //Robot mode
+  std::atomic<double> controller_timer_; //Controller realtime thread execution time
+  std::atomic<double> robot_mode_; //Robot mode
 	std::vector<double> joint_modes_; //Joint control modes
-	double safety_mode_; //Safety mode
+  std::atomic<double> safety_mode_; //Safety mode
 	std::vector<double> tool_accelerometer_values_; //Tool x,y and z accelerometer values (software version 1.7)
-	double speed_scaling_; //Speed scaling of the trajectory limiter
-	double linear_momentum_norm_; //Norm of Cartesian linear momentum
-	double v_main_; //Masterboard: Main voltage
-	double v_robot_; //Matorborad: Robot voltage (48V)
-	double i_robot_; //Masterboard: Robot current
+  std::atomic<double> speed_scaling_; //Speed scaling of the trajectory limiter
+  std::atomic<double> linear_momentum_norm_; //Norm of Cartesian linear momentum
+  std::atomic<double> v_main_; //Masterboard: Main voltage
+  std::atomic<double> v_robot_; //Matorborad: Robot voltage (48V)
+  std::atomic<double> i_robot_; //Masterboard: Robot current
 	std::vector<double> v_actual_; //Actual joint voltages
 
 	std::mutex val_lock_; // Locks the variables while unpack parses data;
@@ -66,8 +67,9 @@ private:
 	bool data_published_; //to avoid spurious wakes
 	bool controller_updated_; //to avoid spurious wakes
 
-	std::vector<double> unpackVector(uint8_t * buf, int start_index,
+  std::vector<double> unpackVector(uint8_t * buf, unsigned int& start_index,
 			int nr_of_vals);
+  double unpackDouble(uint8_t * buf, unsigned int& start_index);
 	std::vector<bool> unpackDigitalInputBits(int64_t data);
 	double ntohd(uint64_t nf);
 
