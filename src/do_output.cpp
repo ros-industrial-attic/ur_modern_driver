@@ -18,40 +18,40 @@
 
 #include "ur_modern_driver/do_output.h"
 
-void print_debug(const std::string &inp) {
+void print_debug(const char* inp) {
 #ifdef ROS_BUILD
-	ROS_DEBUG("%s", inp.c_str());
+  ROS_DEBUG("%s", inp);
 #else
-	printf("DEBUG: %s\n", inp.c_str());
+  printf("DEBUG: %s\n", inp);
 #endif
 }
-void print_info(const std::string& inp) {
+void print_info(const char*  inp) {
 #ifdef ROS_BUILD
-	ROS_INFO("%s", inp.c_str());
+  ROS_INFO("%s", inp);
 #else
-	printf("INFO: %s\n", inp.c_str());
+  printf("INFO: %s\n", inp);
 #endif
 }
-void print_warning(const std::string &inp) {
+void print_warning(const char* inp) {
 #ifdef ROS_BUILD
-	ROS_WARN("%s", inp.c_str());
+  ROS_WARN("%s", inp);
 #else
-	printf("WARNING: %s\n", inp.c_str());
+  printf("WARNING: %s\n", inp);
 #endif
 }
-void print_error(const std::string& inp) {
+void print_error(const char* inp) {
 #ifdef ROS_BUILD
-	ROS_ERROR("%s", inp.c_str());
+  ROS_ERROR("%s", inp);
 #else
-	printf("ERROR: %s\n", inp.c_str());
+  printf("ERROR: %s\n", inp);
 #endif
 }
-void print_fatal(const std::string &inp) {
+void print_fatal(const char* inp) {
 #ifdef ROS_BUILD
-	ROS_FATAL("%s", inp.c_str());
+  ROS_FATAL("%s", inp);
 	ros::shutdown();
 #else
-	printf("FATAL: %s\n", inp.c_str());
+  printf("FATAL: %s\n", inp);
 	exit(1);
 #endif
 }
