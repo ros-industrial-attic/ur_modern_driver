@@ -454,7 +454,7 @@ private:
 	
 	void reorder_traj_joints(trajectory_msgs::JointTrajectory& traj) {
 		/* Reorders trajectory - destructive */
-		std::vector<std::string> actual_joint_names = robot_.getJointNames();
+    const std::vector<std::string>& actual_joint_names = robot_.getJointNames();
 		std::vector<unsigned int> mapping;
 		mapping.resize(actual_joint_names.size(), actual_joint_names.size());
 		for (unsigned int i = 0; i < traj.joint_names.size(); i++) {
