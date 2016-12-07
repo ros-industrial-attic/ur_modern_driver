@@ -84,18 +84,18 @@ double RobotStateRT::ntohd(uint64_t nf) {
 std::vector<double> RobotStateRT::unpackVector(uint8_t * buf, int start_index,
 		int nr_of_vals) {
 	uint64_t q;
-	std::vector<double> ret;
+	std::vector<double> ret(nr_of_vals);
 	for (int i = 0; i < nr_of_vals; i++) {
 		memcpy(&q, &buf[start_index + i * sizeof(q)], sizeof(q));
-		ret.push_back(ntohd(q));
+		ret[i] = (ntohd(q));
 	}
 	return ret;
 }
 
 std::vector<bool> RobotStateRT::unpackDigitalInputBits(int64_t data) {
-	std::vector<bool> ret;
+	std::vector<bool> ret(64);
 	for (int i = 0; i < 64; i++) {
-		ret.push_back((data & (1 << i)) >> i);
+		ret[i] = ((data & (1 << i)) >> i);
 	}
 	return ret;
 }
@@ -316,10 +316,10 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	val_lock_.lock();
 	int len;
 	memcpy(&len, &buf[offset], sizeof(len));
-
+	
 	offset += sizeof(len);
 	len = ntohl(len);
-
+	
 	//Check the correct message length is received
 	bool len_good = true;
 	if (version_ >= 1.6 && version_ < 1.7) { //v1.6
@@ -338,13 +338,13 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		if (len != 1060)
 			len_good = false;
 	}
-
+	
 	if (!len_good) {
 		printf("Wrong length of message on RT interface: %i\n", len);
 		val_lock_.unlock();
 		return;
 	}
-
+	
 	memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 	time_ = RobotStateRT::ntohd(unpack_to);
 	offset += sizeof(double);
@@ -387,7 +387,7 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		tcp_speed_target_ = unpackVector(buf, offset, 6);
 	}
 	offset += sizeof(double) * 6;
-
+	
 	memcpy(&digital_input_bits, &buf[offset], sizeof(digital_input_bits));
 	digital_input_bits_ = unpackDigitalInputBits(be64toh(digital_input_bits));
 	offset += sizeof(double);
@@ -432,6 +432,6 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	controller_updated_ = true;
 	data_published_ = true;
 	pMsg_cond_->notify_all();
-
+	
 }
 
