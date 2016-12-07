@@ -455,36 +455,37 @@ private:
 	void reorder_traj_joints(trajectory_msgs::JointTrajectory& traj) {
 		/* Reorders trajectory - destructive */
     const std::vector<std::string>& actual_joint_names = robot_.getJointNames();
-		std::vector<unsigned int> mapping;
-		mapping.resize(actual_joint_names.size(), actual_joint_names.size());
-		for (unsigned int i = 0; i < traj.joint_names.size(); i++) {
-			for (unsigned int j = 0; j < actual_joint_names.size(); j++) {
-				if (traj.joint_names[i] == actual_joint_names[j])
+    assert( actual_joint_names.size() == 6);
+    assert( traj.joint_names.size() == 6);
+
+    std::array<unsigned int,6> mapping;
+
+    for (unsigned int i = 0; i < 6; i++) {
+      for (unsigned int j = 0; j < 6; j++) {
+        if (traj.joint_names[i] == actual_joint_names[j]){
 					mapping[j] = i;
+          break;
+        }
 			}
 		}
 		traj.joint_names = actual_joint_names;
-		std::vector<trajectory_msgs::JointTrajectoryPoint> new_traj;
-		new_traj.reserve(traj.points.size());
-		for (unsigned int i = 0; i < traj.points.size(); i++) {
-			const int points_count = traj.points[i].positions.size();
-			trajectory_msgs::JointTrajectoryPoint new_point;
-			new_point.positions.reserve(points_count);
-			new_point.velocities.reserve(points_count);
-			new_point.accelerations.reserve(points_count);
-			for (unsigned int j = 0; j < points_count; j++) {
-				new_point.positions.push_back(
-						traj.points[i].positions[mapping[j]]);
-				new_point.velocities.push_back(
-						traj.points[i].velocities[mapping[j]]);
-				if (traj.points[i].accelerations.size() != 0)
-					new_point.accelerations.push_back(
-							traj.points[i].accelerations[mapping[j]]);
+    std::array<double,6> temp_pos, temp_vel, temp_acc;
+
+    for (trajectory_msgs::JointTrajectoryPoint& traj_point: traj.points) {
+
+      for (unsigned int j = 0; j < 6; j++) {
+        temp_pos[j] = traj_point.positions[mapping[j]];
+        temp_vel[j] = traj_point.velocities[mapping[j]];
+        if (traj.points[j].accelerations.size() != 0)
+          temp_acc[j] = traj_point.accelerations[mapping[j]];
 			}
-			new_point.time_from_start = traj.points[i].time_from_start;
-			new_traj.push_back(new_point);
+      for (unsigned int j = 0; j < 6; j++) {
+        traj_point.positions[j] = temp_pos[j];
+        traj_point.velocities[j] = temp_vel[j];
+        if (traj_point.accelerations.size() != 0)
+          traj_point.accelerations[j] = temp_acc[j];
+      }
 		}
-		traj.points = new_traj;
 	}
 	
 	bool has_velocities() {
