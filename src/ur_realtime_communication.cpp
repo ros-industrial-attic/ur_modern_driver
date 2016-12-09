@@ -84,15 +84,23 @@ void UrRealtimeCommunication::halt() {
 	comThread_.join();
 }
 
-void UrRealtimeCommunication::addCommandToQueue(std::string inp) {
+void UrRealtimeCommunication::addCommandToQueue(const std::string& inp) {
 	int bytes_written;
-	if (inp.back() != '\n') {
-		inp.append("\n");
-	}
+  assert( inp.back == '\n');
 	if (connected_)
 		bytes_written = write(sockfd_, inp.c_str(), inp.length());
 	else
 		print_error("Could not send command \"" +inp + "\". The robot is not connected! Command is discarded" );
+}
+
+void UrRealtimeCommunication::addCommandToQueue(const char* inp) {
+  int bytes_written;
+  const unsigned length = strlen(inp);
+  assert( inp[length-1] == '\n');
+  if (connected_)
+    bytes_written = write(sockfd_, inp, length);
+  else
+    print_error("Could not send command \"" + std::string(inp) + "\". The robot is not connected! Command is discarded" );
 }
 
 void UrRealtimeCommunication::setSpeed(double q0, double q1, double q2,
@@ -108,7 +116,7 @@ void UrRealtimeCommunication::setSpeed(double q0, double q1, double q2,
 				"speedj([%1.5f, %1.5f, %1.5f, %1.5f, %1.5f, %1.5f], %f, 0.02)\n",
 				q0, q1, q2, q3, q4, q5, acc);		
 	}
-	addCommandToQueue((std::string) (cmd));
+  addCommandToQueue(cmd);
 	if (q0 != 0. or q1 != 0. or q2 != 0. or q3 != 0. or q4 != 0. or q5 != 0.) {
 		//If a joint speed is set, make sure we stop it again after some time if the user doesn't
 		safety_count_ = 0;
