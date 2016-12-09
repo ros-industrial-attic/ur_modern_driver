@@ -240,13 +240,16 @@ bool UrDriver::openServo() {
 	return true;
 }
 void UrDriver::closeServo(const std::vector<double>& positions) {
-	if (positions.size() != 6)
-		UrDriver::servoj(rt_interface_->robot_state_->getQActual(), 0);
-	else
-		UrDriver::servoj(positions, 0);
-
+  assert (positions.size() == 6);
+  UrDriver::servoj(positions, 0);
 	reverse_connected_ = false;
 	close(new_sockfd_);
+}
+
+void UrDriver::closeServo() {
+  UrDriver::servoj(rt_interface_->robot_state_->getQActual(), 0);
+  reverse_connected_ = false;
+  close(new_sockfd_);
 }
 
 bool UrDriver::start() {
