@@ -79,9 +79,10 @@ public:
   void closeServo(const std::vector<double> &positions);
   void closeServo();
 
-	std::vector<double> interp_cubic(double t, double T,
-      const std::vector<double> p0_pos, const std::vector<double>& p1_pos,
-      const std::vector<double> p0_vel, const std::vector<double>& p1_vel) const;
+  static void interp_cubic(double t, double T,
+      const std::vector<double>& p0_pos, const std::vector<double>& p1_pos,
+      const std::vector<double>& p0_vel, const std::vector<double>& p1_vel,
+      std::vector<double> &interpolated_position);
 
   const std::vector<std::string>& getJointNames() const;
   void setJointNames(const std::vector<std::string>& jn);

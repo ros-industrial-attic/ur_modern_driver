@@ -58,11 +58,12 @@ UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 	listen(incoming_sockfd_, 5);
 }
 
-std::vector<double> UrDriver::interp_cubic(double t, double T,
-    const std::vector<double> p0_pos, const std::vector<double> &p1_pos,
-    const std::vector<double> p0_vel, const std::vector<double> &p1_vel) const {
+void UrDriver::interp_cubic(double t, double T,
+    const std::vector<double> &p0_pos, const std::vector<double> &p1_pos,
+    const std::vector<double> &p0_vel, const std::vector<double> &p1_vel,
+    std::vector<double>& interpolated_position) {
 	/*Returns positions of the joints at time 't' */
-  std::vector<double> positions(p0_pos.size());
+  interpolated_position.resize(p0_pos.size());
 	for (unsigned int i = 0; i < p0_pos.size(); i++) {
 		double a = p0_pos[i];
 		double b = p0_vel[i];
@@ -70,44 +71,43 @@ std::vector<double> UrDriver::interp_cubic(double t, double T,
 				- T * p1_vel[i]) / pow(T, 2);
 		double d = (2 * p0_pos[i] - 2 * p1_pos[i] + T * p0_vel[i]
 				+ T * p1_vel[i]) / pow(T, 3);
-    positions[i] =(a + b * t + c * pow(t, 2) + d * pow(t, 3));
+    interpolated_position[i] =(a + b * t + c * pow(t, 2) + d * pow(t, 3));
 	}
-	return positions;
 }
 
 bool UrDriver::doTraj(const std::vector<double> &inp_timestamps,
     const std::vector<std::vector<double> > &inp_positions,
     const std::vector<std::vector<double> > &inp_velocities) {
-	std::chrono::high_resolution_clock::time_point t0, t;
+  std::chrono::high_resolution_clock::time_point t0;
 	std::vector<double> positions;
-	unsigned int j;
+  unsigned int j = 0;
 
 	if (!UrDriver::uploadProg()) {
 		return false;
 	}
-	executing_traj_ = true;
+  unsigned int executing_traj_ = true;
 	t0 = std::chrono::high_resolution_clock::now();
-	t = t0;
-	j = 0;
-	while ((inp_timestamps[inp_timestamps.size() - 1]
-			>= std::chrono::duration_cast<std::chrono::duration<double>>(t - t0).count())
-			and executing_traj_) {
-		while (inp_timestamps[j]
-				<= std::chrono::duration_cast<std::chrono::duration<double>>(
-						t - t0).count() && j < inp_timestamps.size() - 1) {
+  double elapsed_time = 0.0;
+
+  const std::chrono::milliseconds sleep_time((int) ((servoj_time_ * 1000) / 4.));
+
+  while ((inp_timestamps[inp_timestamps.size() - 1]	>= elapsed_time) &&
+         executing_traj_) {
+    while (inp_timestamps[j] <= elapsed_time &&
+           j < inp_timestamps.size() - 1) {
 			j += 1;
 		}
-		positions = UrDriver::interp_cubic(
-				std::chrono::duration_cast<std::chrono::duration<double>>(
-						t - t0).count() - inp_timestamps[j - 1],
+    UrDriver::interp_cubic(
+        elapsed_time - inp_timestamps[j - 1],
 				inp_timestamps[j] - inp_timestamps[j - 1], inp_positions[j - 1],
-				inp_positions[j], inp_velocities[j - 1], inp_velocities[j]);
+        inp_positions[j], inp_velocities[j - 1], inp_velocities[j],
+        positions);
 		UrDriver::servoj(positions);
 
 		// oversample with 4 * sample_time
-		std::this_thread::sleep_for(
-				std::chrono::milliseconds((int) ((servoj_time_ * 1000) / 4.)));
-		t = std::chrono::high_resolution_clock::now();
+    std::this_thread::sleep_for(sleep_time);
+    const std::chrono::duration<double> diff(std::chrono::high_resolution_clock::now()-t0);
+    elapsed_time = diff.count();
 	}
 	executing_traj_ = false;
 	//Signal robot to stop driverProg()
