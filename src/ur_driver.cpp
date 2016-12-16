@@ -240,7 +240,12 @@ bool UrDriver::openServo() {
 	return true;
 }
 void UrDriver::closeServo(const std::vector<double>& positions) {
-  assert (positions.size() == 6);
+  if (positions.size() != 6);
+  {
+    print_error("Command Rejected: UrDriver::closeServo accepts only vectors with size 6.");
+    closeServo();
+    return;
+  }
   UrDriver::servoj(positions, 0);
 	reverse_connected_ = false;
 	close(new_sockfd_);

@@ -86,7 +86,7 @@ void UrRealtimeCommunication::halt() {
 
 void UrRealtimeCommunication::addCommandToQueue(const std::string& inp) {
 	int bytes_written;
-  assert( inp.back == '\n');
+  assert( inp.back() == '\n');
 	if (connected_)
 		bytes_written = write(sockfd_, inp.c_str(), inp.length());
 	else
