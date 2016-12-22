@@ -669,10 +669,10 @@ private:
                 pin = 0;
                 for (std::vector<bool>::iterator it = dout.begin(); it != dout.end(); ++it)
                 {
-                    ur_msgs::Digital digi;
-                    digi.pin = pin;
-                    digi.state = *it;
-                    io_msg_rt.digital_out_states.push_back(digi);
+                    ur_msgs::Digital digo;
+                    digo.pin = pin;
+                    digo.state = *it;
+                    io_msg_rt.digital_out_states.push_back(digo);
                     pin++;
                 }
                 io_pub_rt.publish(io_msg_rt);
