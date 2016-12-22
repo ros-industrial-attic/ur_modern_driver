@@ -105,7 +105,6 @@ public:
 	double getVMain();
 	double getVRobot();
 	double getIRobot();
-    double getProgramState();
 
 	void setVersion(double ver);
 

@@ -316,13 +316,6 @@ std::vector<double> RobotStateRT::getVActual() {
 	val_lock_.unlock();
 	return ret;
 }
-double RobotStateRT::getProgramState() {
-    double ret;
-    val_lock_.lock();
-    ret = program_state_;
-    val_lock_.unlock();
-    return ret;
-}
 void RobotStateRT::unpack(uint8_t * buf) {
     int64_t digital_input_bits;
     int64_t digital_ouput_bits;
