@@ -60,7 +60,6 @@ private:
 	double i_robot_; //Masterboard: Robot current
 	std::vector<double> v_actual_; //Actual joint voltages
     std::vector<bool> digital_output_bits_; //Digital outputs (similar to digital input bits)
-    double program_state_; //Program state
 
 	std::mutex val_lock_; // Locks the variables while unpack parses data;
 
