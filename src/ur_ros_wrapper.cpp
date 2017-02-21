@@ -589,10 +589,11 @@ private:
 			robot_.rt_interface_->robot_state_->setControllerUpdated();
 
 			// Control
+			bool reset_controllers = !robot_.sec_interface_->robot_state_->isReady();
 			clock_gettime(CLOCK_MONOTONIC, &current_time);
 			elapsed_time = ros::Duration(current_time.tv_sec - last_time.tv_sec + (current_time.tv_nsec - last_time.tv_nsec)/ BILLION);
 			ros::Time ros_time = ros::Time::now();
-			controller_manager_->update(ros_time, elapsed_time);
+			controller_manager_->update(ros_time, elapsed_time, reset_controllers);
 			last_time = current_time;
 
 			// Output
