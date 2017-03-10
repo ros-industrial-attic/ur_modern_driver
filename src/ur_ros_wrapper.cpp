@@ -344,7 +344,7 @@ private:
 
 		reorder_traj_joints(goal.trajectory);
 		
-		if (!start_positions_match(goal.trajectory, 0.01)) {
+		if (!start_positions_match(goal.trajectory, 0.04)) {
 			result_.error_code = result_.INVALID_GOAL;
 			result_.error_string = "Goal start doesn't match current pose";
 			gh.setRejected(result_, result_.error_string);
