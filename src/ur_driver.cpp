@@ -25,7 +25,8 @@ UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 		double max_payload, double servoj_lookahead_time, double servoj_gain) :
 		REVERSE_PORT_(reverse_port), maximum_time_step_(max_time_step), minimum_payload_(
 				min_payload), maximum_payload_(max_payload), servoj_time_(
-				servoj_time), servoj_lookahead_time_(servoj_lookahead_time), servoj_gain_(servoj_gain) {
+				servoj_time), servoj_lookahead_time_(servoj_lookahead_time), servoj_gain_(servoj_gain),
+		host_(host) {
 	char buffer[256];
 	struct sockaddr_in serv_addr;
 	int n, flag;
@@ -379,4 +380,50 @@ void UrDriver::setServojGain(double g){
 		} else {
 			servoj_gain_ = 100;
 		}
+}
+
+bool UrDriver::unlockProtectiveStop() {
+	addrinfo info;
+
+	memset(&info, 0, sizeof(info));
+	info.ai_family = AF_UNSPEC;
+	info.ai_socktype = SOCK_STREAM;
+
+	addrinfo* res = 0;
+
+	if(getaddrinfo(host_.c_str(), "29999", &info, &res) != 0 || !res)
+	{
+		perror("Could not get address for UR host");
+		return false;
+	}
+
+	sockaddr_storage addr;
+	socklen_t addrlen = res->ai_addrlen;
+	memcpy(&addr, res->ai_addr, res->ai_addrlen);
+
+	int fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+
+	freeaddrinfo(res);
+
+	if(fd < 0)
+	{
+		perror("socket");
+		return false;
+	}
+
+	if(connect(fd, (const sockaddr*)&addr, addrlen) != 0)
+	{
+		perror("Could not connect to UR dashboard");
+		return false;
+	}
+
+	const char* cmd = "unlock protective stop\n";
+	if(write(fd, cmd, strlen(cmd)) != strlen(cmd))
+	{
+		perror("Could not write to UR dashboard");
+		return false;
+	}
+
+	close(fd);
+	return true;
 }

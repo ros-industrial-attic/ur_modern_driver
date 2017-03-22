@@ -51,6 +51,8 @@
 #include <controller_manager/controller_manager.h>
 #include <realtime_tools/realtime_publisher.h>
 
+#include <std_srvs/Empty.h>
+
 /// TF
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
@@ -70,6 +72,7 @@ protected:
 	ros::Subscriber urscript_sub_;
 	ros::ServiceServer io_srv_;
 	ros::ServiceServer payload_srv_;
+	ros::ServiceServer unlockProtStop_srv_;
 	std::thread* rt_publish_thread_;
 	std::thread* mb_publish_thread_;
 	double io_flag_delay_;
@@ -213,6 +216,8 @@ public:
 					&RosWrapper::setIO, this);
 			payload_srv_ = nh_.advertiseService("ur_driver/set_payload",
 					&RosWrapper::setPayload, this);
+			unlockProtStop_srv_ = nh_.advertiseService("ur_driver/unlock_protective_stop",
+					&RosWrapper::unlockProtectiveStop, this);
 		}
 	}
 
@@ -422,6 +427,11 @@ private:
 		else
 			resp.success = true;
 		return resp.success;
+	}
+
+	bool unlockProtectiveStop(std_srvs::EmptyRequest&, std_srvs::EmptyResponse&)
+	{
+		return robot_.unlockProtectiveStop();
 	}
 
 	bool validateJointNames() {
@@ -781,7 +791,12 @@ private:
 					print_error("Aborting trajectory");
 					robot_.stopTraj();
 					result_.error_code = result_.SUCCESSFUL;
-					result_.error_string = "Robot was halted";
+
+					if(robot_.sec_interface_->robot_state_->isEmergencyStopped())
+						result_.error_string = "EMERGENCY STOP";
+					else
+						result_.error_string = "PROTECTIVE STOP";
+
 					goal_handle_.setAborted(result_, result_.error_string);
 					has_goal_ = false;
 				}

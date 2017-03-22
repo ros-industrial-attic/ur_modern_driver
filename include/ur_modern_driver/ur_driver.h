@@ -52,6 +52,7 @@ private:
 	double firmware_version_;
 	double servoj_lookahead_time_;
 	double servoj_gain_;
+	std::string host_;
 public:
 	UrRealtimeCommunication* rt_interface_;
 	UrCommunication* sec_interface_;
@@ -96,6 +97,7 @@ public:
 	void setServojLookahead(double t);
 	void setServojGain(double g);
 
+	bool unlockProtectiveStop();
 };
 
 #endif /* UR_DRIVER_H_ */
