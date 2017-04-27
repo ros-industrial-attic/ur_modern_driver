@@ -67,9 +67,10 @@ public:
 	void halt();
 	void setSpeed(double q0, double q1, double q2, double q3, double q4,
 			double q5, double acc = 100.);
-	void addCommandToQueue(std::string inp);
+  void addCommandToQueue(const std::string &inp);
+  void addCommandToQueue(const char* inp);
 	void setSafetyCountMax(uint inp);
-	std::string getLocalIp();
+  const std::string &getLocalIp() const;
 
 };
 

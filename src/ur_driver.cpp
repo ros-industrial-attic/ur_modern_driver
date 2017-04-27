@@ -58,11 +58,12 @@ UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
 	listen(incoming_sockfd_, 5);
 }
 
-std::vector<double> UrDriver::interp_cubic(double t, double T,
-		std::vector<double> p0_pos, std::vector<double> p1_pos,
-		std::vector<double> p0_vel, std::vector<double> p1_vel) {
+void UrDriver::interp_cubic(double t, double T,
+    const std::vector<double> &p0_pos, const std::vector<double> &p1_pos,
+    const std::vector<double> &p0_vel, const std::vector<double> &p1_vel,
+    std::vector<double>& interpolated_position) {
 	/*Returns positions of the joints at time 't' */
-	std::vector<double> positions;
+  interpolated_position.resize(p0_pos.size());
 	for (unsigned int i = 0; i < p0_pos.size(); i++) {
 		double a = p0_pos[i];
 		double b = p0_vel[i];
@@ -70,44 +71,43 @@ std::vector<double> UrDriver::interp_cubic(double t, double T,
 				- T * p1_vel[i]) / pow(T, 2);
 		double d = (2 * p0_pos[i] - 2 * p1_pos[i] + T * p0_vel[i]
 				+ T * p1_vel[i]) / pow(T, 3);
-		positions.push_back(a + b * t + c * pow(t, 2) + d * pow(t, 3));
+    interpolated_position[i] =(a + b * t + c * pow(t, 2) + d * pow(t, 3));
 	}
-	return positions;
 }
 
-bool UrDriver::doTraj(std::vector<double> inp_timestamps,
-		std::vector<std::vector<double> > inp_positions,
-		std::vector<std::vector<double> > inp_velocities) {
-	std::chrono::high_resolution_clock::time_point t0, t;
+bool UrDriver::doTraj(const std::vector<double> &inp_timestamps,
+    const std::vector<std::vector<double> > &inp_positions,
+    const std::vector<std::vector<double> > &inp_velocities) {
+  std::chrono::high_resolution_clock::time_point t0;
 	std::vector<double> positions;
-	unsigned int j;
+  unsigned int j = 0;
 
 	if (!UrDriver::uploadProg()) {
 		return false;
 	}
-	executing_traj_ = true;
+  unsigned int executing_traj_ = true;
 	t0 = std::chrono::high_resolution_clock::now();
-	t = t0;
-	j = 0;
-	while ((inp_timestamps[inp_timestamps.size() - 1]
-			>= std::chrono::duration_cast<std::chrono::duration<double>>(t - t0).count())
-			and executing_traj_) {
-		while (inp_timestamps[j]
-				<= std::chrono::duration_cast<std::chrono::duration<double>>(
-						t - t0).count() && j < inp_timestamps.size() - 1) {
+  double elapsed_time = 0.0;
+
+  const std::chrono::milliseconds sleep_time((int) ((servoj_time_ * 1000) / 4.));
+
+  while ((inp_timestamps[inp_timestamps.size() - 1]	>= elapsed_time) &&
+         executing_traj_) {
+    while (inp_timestamps[j] <= elapsed_time &&
+           j < inp_timestamps.size() - 1) {
 			j += 1;
 		}
-		positions = UrDriver::interp_cubic(
-				std::chrono::duration_cast<std::chrono::duration<double>>(
-						t - t0).count() - inp_timestamps[j - 1],
+    UrDriver::interp_cubic(
+        elapsed_time - inp_timestamps[j - 1],
 				inp_timestamps[j] - inp_timestamps[j - 1], inp_positions[j - 1],
-				inp_positions[j], inp_velocities[j - 1], inp_velocities[j]);
+        inp_positions[j], inp_velocities[j - 1], inp_velocities[j],
+        positions);
 		UrDriver::servoj(positions);
 
 		// oversample with 4 * sample_time
-		std::this_thread::sleep_for(
-				std::chrono::milliseconds((int) ((servoj_time_ * 1000) / 4.)));
-		t = std::chrono::high_resolution_clock::now();
+    std::this_thread::sleep_for(sleep_time);
+    const std::chrono::duration<double> diff(std::chrono::high_resolution_clock::now()-t0);
+    elapsed_time = diff.count();
 	}
 	executing_traj_ = false;
 	//Signal robot to stop driverProg()
@@ -115,7 +115,7 @@ bool UrDriver::doTraj(std::vector<double> inp_timestamps,
 	return true;
 }
 
-void UrDriver::servoj(std::vector<double> positions, int keepalive) {
+void UrDriver::servoj(const std::vector<double>& positions, int keepalive) {
 	if (!reverse_connected_) {
 		print_error(
 				"UrDriver::servoj called without a reverse connection present. Keepalive: "
@@ -146,40 +146,42 @@ void UrDriver::stopTraj() {
 }
 
 bool UrDriver::uploadProg() {
-	std::string cmd_str;
+  static std::string cmd_str;
+  cmd_str.clear(); // reuse the memory stored in the previous loop
 	char buf[128];
-	cmd_str = "def driverProg():\n";
+  cmd_str += "def driverProg():\n";
 
 	sprintf(buf, "\tMULT_jointstate = %i\n", MULT_JOINTSTATE_);
 	cmd_str += buf;
 
-	cmd_str += "\tSERVO_IDLE = 0\n";
-	cmd_str += "\tSERVO_RUNNING = 1\n";
-	cmd_str += "\tcmd_servo_state = SERVO_IDLE\n";
-	cmd_str += "\tcmd_servo_q = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]\n";
-	cmd_str += "\tdef set_servo_setpoint(q):\n";
-	cmd_str += "\t\tenter_critical\n";
-	cmd_str += "\t\tcmd_servo_state = SERVO_RUNNING\n";
-	cmd_str += "\t\tcmd_servo_q = q\n";
-	cmd_str += "\t\texit_critical\n";
-	cmd_str += "\tend\n";
-	cmd_str += "\tthread servoThread():\n";
-	cmd_str += "\t\tstate = SERVO_IDLE\n";
-	cmd_str += "\t\twhile True:\n";
-	cmd_str += "\t\t\tenter_critical\n";
-	cmd_str += "\t\t\tq = cmd_servo_q\n";
-	cmd_str += "\t\t\tdo_brake = False\n";
-	cmd_str += "\t\t\tif (state == SERVO_RUNNING) and ";
-	cmd_str += "(cmd_servo_state == SERVO_IDLE):\n";
-	cmd_str += "\t\t\t\tdo_brake = True\n";
-	cmd_str += "\t\t\tend\n";
-	cmd_str += "\t\t\tstate = cmd_servo_state\n";
-	cmd_str += "\t\t\tcmd_servo_state = SERVO_IDLE\n";
-	cmd_str += "\t\t\texit_critical\n";
-	cmd_str += "\t\t\tif do_brake:\n";
-	cmd_str += "\t\t\t\tstopj(1.0)\n";
-	cmd_str += "\t\t\t\tsync()\n";
-	cmd_str += "\t\t\telif state == SERVO_RUNNING:\n";
+  cmd_str +=
+      "\tSERVO_IDLE = 0\n";
+      "\tSERVO_RUNNING = 1\n"
+      "\tcmd_servo_state = SERVO_IDLE\n"
+      "\tcmd_servo_q = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]\n"
+      "\tdef set_servo_setpoint(q):\n"
+      "\t\tenter_critical\n"
+      "\t\tcmd_servo_state = SERVO_RUNNING\n"
+      "\t\tcmd_servo_q = q\n"
+      "\t\texit_critical\n"
+      "\tend\n"
+      "\tthread servoThread():\n"
+      "\t\tstate = SERVO_IDLE\n"
+      "\t\twhile True:\n"
+      "\t\t\tenter_critical\n"
+      "\t\t\tq = cmd_servo_q\n"
+      "\t\t\tdo_brake = False\n"
+      "\t\t\tif (state == SERVO_RUNNING) and "
+      "(cmd_servo_state == SERVO_IDLE):\n"
+      "\t\t\t\tdo_brake = True\n"
+      "\t\t\tend\n"
+      "\t\t\tstate = cmd_servo_state\n"
+      "\t\t\tcmd_servo_state = SERVO_IDLE\n"
+      "\t\t\texit_critical\n"
+      "\t\t\tif do_brake:\n"
+      "\t\t\t\tstopj(1.0)\n"
+      "\t\t\t\tsync()\n"
+      "\t\t\telif state == SERVO_RUNNING:\n";
 
 	if (sec_interface_->robot_state_->getVersion() >= 3.1)
 		sprintf(buf, "\t\t\t\tservoj(q, t=%.4f, lookahead_time=%.4f, gain=%.0f)\n",
@@ -188,35 +190,37 @@ bool UrDriver::uploadProg() {
 		sprintf(buf, "\t\t\t\tservoj(q, t=%.4f)\n", servoj_time_);
 	cmd_str += buf;
 
-	cmd_str += "\t\t\telse:\n";
-	cmd_str += "\t\t\t\tsync()\n";
-	cmd_str += "\t\t\tend\n";
-	cmd_str += "\t\tend\n";
-	cmd_str += "\tend\n";
+  cmd_str +=
+      "\t\t\telse:\n"
+      "\t\t\t\tsync()\n"
+      "\t\t\tend\n"
+      "\t\tend\n"
+      "\tend\n";
 
 	sprintf(buf, "\tsocket_open(\"%s\", %i)\n", ip_addr_.c_str(),
 			REVERSE_PORT_);
 	cmd_str += buf;
 
-	cmd_str += "\tthread_servo = run servoThread()\n";
-	cmd_str += "\tkeepalive = 1\n";
-	cmd_str += "\twhile keepalive > 0:\n";
-	cmd_str += "\t\tparams_mult = socket_read_binary_integer(6+1)\n";
-	cmd_str += "\t\tif params_mult[0] > 0:\n";
-	cmd_str += "\t\t\tq = [params_mult[1] / MULT_jointstate, ";
-	cmd_str += "params_mult[2] / MULT_jointstate, ";
-	cmd_str += "params_mult[3] / MULT_jointstate, ";
-	cmd_str += "params_mult[4] / MULT_jointstate, ";
-	cmd_str += "params_mult[5] / MULT_jointstate, ";
-	cmd_str += "params_mult[6] / MULT_jointstate]\n";
-	cmd_str += "\t\t\tkeepalive = params_mult[7]\n";
-	cmd_str += "\t\t\tset_servo_setpoint(q)\n";
-	cmd_str += "\t\tend\n";
-	cmd_str += "\tend\n";
-	cmd_str += "\tsleep(.1)\n";
-	cmd_str += "\tsocket_close()\n";
-	cmd_str += "\tkill thread_servo\n";
-	cmd_str += "end\n";
+  cmd_str +=
+      "\tthread_servo = run servoThread()\n";
+      "\tkeepalive = 1\n"
+      "\twhile keepalive > 0:\n"
+      "\t\tparams_mult = socket_read_binary_integer(6+1)\n"
+      "\t\tif params_mult[0] > 0:\n"
+      "\t\t\tq = [params_mult[1] / MULT_jointstate, "
+      "params_mult[2] / MULT_jointstate, "
+      "params_mult[3] / MULT_jointstate, "
+      "params_mult[4] / MULT_jointstate, "
+      "params_mult[5] / MULT_jointstate, "
+      "params_mult[6] / MULT_jointstate]\n"
+      "\t\t\tkeepalive = params_mult[7]\n"
+      "\t\t\tset_servo_setpoint(q)\n"
+      "\t\tend\n"
+      "\tend\n"
+      "\tsleep(.1)\n"
+      "\tsocket_close()\n"
+      "\tkill thread_servo\n"
+      "end\n";
 
 	rt_interface_->addCommandToQueue(cmd_str);
 	return UrDriver::openServo();
@@ -235,14 +239,22 @@ bool UrDriver::openServo() {
 	reverse_connected_ = true;
 	return true;
 }
-void UrDriver::closeServo(std::vector<double> positions) {
-	if (positions.size() != 6)
-		UrDriver::servoj(rt_interface_->robot_state_->getQActual(), 0);
-	else
-		UrDriver::servoj(positions, 0);
-
+void UrDriver::closeServo(const std::vector<double>& positions) {
+  if (positions.size() != 6);
+  {
+    print_error("Command Rejected: UrDriver::closeServo accepts only vectors with size 6.");
+    closeServo();
+    return;
+  }
+  UrDriver::servoj(positions, 0);
 	reverse_connected_ = false;
 	close(new_sockfd_);
+}
+
+void UrDriver::closeServo() {
+  UrDriver::servoj(rt_interface_->robot_state_->getQActual(), 0);
+  reverse_connected_ = false;
+  close(new_sockfd_);
 }
 
 bool UrDriver::start() {
@@ -274,11 +286,11 @@ void UrDriver::setSpeed(double q0, double q1, double q2, double q3, double q4,
 	rt_interface_->setSpeed(q0, q1, q2, q3, q4, q5, acc);
 }
 
-std::vector<std::string> UrDriver::getJointNames() {
+const std::vector<std::string> &UrDriver::getJointNames() const {
 	return joint_names_;
 }
 
-void UrDriver::setJointNames(std::vector<std::string> jn) {
+void UrDriver::setJointNames(const std::vector<std::string> &jn) {
 	joint_names_ = jn;
 }
 

@@ -66,9 +66,9 @@ private:
 	bool data_published_; //to avoid spurious wakes
 	bool controller_updated_; //to avoid spurious wakes
 
-	std::vector<double> unpackVector(uint8_t * buf, int start_index,
-			int nr_of_vals);
-	std::vector<bool> unpackDigitalInputBits(int64_t data);
+  void unpackVector(uint8_t * buf, int start_index,
+      int nr_of_vals, std::vector<double>& output);
+  void unpackDigitalInputBits(int64_t data, std::vector<bool> &output);
 	double ntohd(uint64_t nf);
 
 public:

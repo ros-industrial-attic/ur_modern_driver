@@ -81,23 +81,21 @@ double RobotStateRT::ntohd(uint64_t nf) {
 	return x;
 }
 
-std::vector<double> RobotStateRT::unpackVector(uint8_t * buf, int start_index,
-		int nr_of_vals) {
+void RobotStateRT::unpackVector(uint8_t * buf, int start_index,
+    int nr_of_vals, std::vector<double> &output) {
 	uint64_t q;
-	std::vector<double> ret;
+  output.resize(nr_of_vals); // does nothing is the size is already nr_of_vals
 	for (int i = 0; i < nr_of_vals; i++) {
 		memcpy(&q, &buf[start_index + i * sizeof(q)], sizeof(q));
-		ret.push_back(ntohd(q));
+    output[i] = (ntohd(q));
 	}
-	return ret;
 }
 
-std::vector<bool> RobotStateRT::unpackDigitalInputBits(int64_t data) {
-	std::vector<bool> ret;
+void RobotStateRT::unpackDigitalInputBits(int64_t data, std::vector<bool>& output) {
+  output.resize(64);
 	for (int i = 0; i < 64; i++) {
-		ret.push_back((data & (1 << i)) >> i);
+    output[i] = ((data & (1 << i)) >> i);
 	}
-	return ret;
 }
 
 void RobotStateRT::setVersion(double ver) {
@@ -316,10 +314,10 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	val_lock_.lock();
 	int len;
 	memcpy(&len, &buf[offset], sizeof(len));
-
+	
 	offset += sizeof(len);
 	len = ntohl(len);
-
+	
 	//Check the correct message length is received
 	bool len_good = true;
 	if (version_ >= 1.6 && version_ < 1.7) { //v1.6
@@ -338,60 +336,60 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		if (len != 1060)
 			len_good = false;
 	}
-
+	
 	if (!len_good) {
 		printf("Wrong length of message on RT interface: %i\n", len);
 		val_lock_.unlock();
 		return;
 	}
-
+	
 	memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 	time_ = RobotStateRT::ntohd(unpack_to);
 	offset += sizeof(double);
-	q_target_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, q_target_);
 	offset += sizeof(double) * 6;
-	qd_target_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, qd_target_);
 	offset += sizeof(double) * 6;
-	qdd_target_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, qdd_target_);
 	offset += sizeof(double) * 6;
-	i_target_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, i_target_);
 	offset += sizeof(double) * 6;
-	m_target_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, m_target_);
 	offset += sizeof(double) * 6;
-	q_actual_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, q_actual_);
 	offset += sizeof(double) * 6;
-	qd_actual_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, qd_actual_);
 	offset += sizeof(double) * 6;
-	i_actual_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, i_actual_);
 	offset += sizeof(double) * 6;
 	if (version_ <= 1.9) {
 		if (version_ > 1.6)
-			tool_accelerometer_values_ = unpackVector(buf, offset, 3);
+      unpackVector(buf, offset, 3, tool_accelerometer_values_);
 		offset += sizeof(double) * (3 + 15);
-		tcp_force_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tcp_force_);
 		offset += sizeof(double) * 6;
-		tool_vector_actual_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tool_vector_actual_);
 		offset += sizeof(double) * 6;
-		tcp_speed_actual_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tcp_speed_actual_);
 	} else {
-		i_control_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, i_control_);
 		offset += sizeof(double) * 6;
-		tool_vector_actual_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tool_vector_actual_);
 		offset += sizeof(double) * 6;
-		tcp_speed_actual_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tcp_speed_actual_);
 		offset += sizeof(double) * 6;
-		tcp_force_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tcp_force_);
 		offset += sizeof(double) * 6;
-		tool_vector_target_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tool_vector_target_);
 		offset += sizeof(double) * 6;
-		tcp_speed_target_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, tcp_speed_target_);
 	}
 	offset += sizeof(double) * 6;
-
+	
 	memcpy(&digital_input_bits, &buf[offset], sizeof(digital_input_bits));
-	digital_input_bits_ = unpackDigitalInputBits(be64toh(digital_input_bits));
+  unpackDigitalInputBits(be64toh(digital_input_bits), digital_input_bits_);
 	offset += sizeof(double);
-	motor_temperatures_ = unpackVector(buf, offset, 6);
+  unpackVector(buf, offset, 6, motor_temperatures_);
 	offset += sizeof(double) * 6;
 	memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 	controller_timer_ = ntohd(unpack_to);
@@ -401,7 +399,7 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		robot_mode_ = ntohd(unpack_to);
 		if (version_ > 1.7) {
 			offset += sizeof(double);
-			joint_modes_ = unpackVector(buf, offset, 6);
+      unpackVector(buf, offset, 6, joint_modes_);
 		}
 	}
 	if (version_ > 1.8) {
@@ -409,7 +407,7 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 		safety_mode_ = ntohd(unpack_to);
 		offset += sizeof(double);
-		tool_accelerometer_values_ = unpackVector(buf, offset, 3);
+    unpackVector(buf, offset, 3, tool_accelerometer_values_);
 		offset += sizeof(double) * 3;
 		memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 		speed_scaling_ = ntohd(unpack_to);
@@ -426,12 +424,12 @@ void RobotStateRT::unpack(uint8_t * buf) {
 		memcpy(&unpack_to, &buf[offset], sizeof(unpack_to));
 		i_robot_ = ntohd(unpack_to);
 		offset += sizeof(double);
-		v_actual_ = unpackVector(buf, offset, 6);
+    unpackVector(buf, offset, 6, v_actual_);
 	}
 	val_lock_.unlock();
 	controller_updated_ = true;
 	data_published_ = true;
 	pMsg_cond_->notify_all();
-
+	
 }
 
