@@ -22,7 +22,7 @@ def move1():
     g.trajectory = JointTrajectory()
     g.trajectory.joint_names = JOINT_NAMES
     try:
-        joint_states = rospy.wait_for_message("joint_states", JointState)
+        joint_states = rospy.wait_for_message("/neck/joint_states", JointState)
         joints_pos = joint_states.position
         g.trajectory.points = [
             JointTrajectoryPoint(positions=joints_pos, velocities=[0]*6, time_from_start=rospy.Duration(0.0)),
@@ -46,7 +46,7 @@ def move_disordered():
     q2 = [Q2[i] for i in order]
     q3 = [Q3[i] for i in order]
     try:
-        joint_states = rospy.wait_for_message("joint_states", JointState)
+        joint_states = rospy.wait_for_message("/neck/joint_states", JointState)
         joints_pos = joint_states.position
         g.trajectory.points = [
             JointTrajectoryPoint(positions=joints_pos, velocities=[0]*6, time_from_start=rospy.Duration(0.0)),
@@ -66,7 +66,7 @@ def move_repeated():
     g.trajectory = JointTrajectory()
     g.trajectory.joint_names = JOINT_NAMES
     try:
-        joint_states = rospy.wait_for_message("joint_states", JointState)
+        joint_states = rospy.wait_for_message("/neck/joint_states", JointState)
         joints_pos = joint_states.position
         d = 2.0
         g.trajectory.points = [JointTrajectoryPoint(positions=joints_pos, velocities=[0]*6, time_from_start=rospy.Duration(0.0))]
@@ -93,7 +93,7 @@ def move_interrupt():
     g.trajectory = JointTrajectory()
     g.trajectory.joint_names = JOINT_NAMES
     try:
-        joint_states = rospy.wait_for_message("joint_states", JointState)
+        joint_states = rospy.wait_for_message("/neck/joint_states", JointState)
         joints_pos = joint_states.position
         g.trajectory.points = [
             JointTrajectoryPoint(positions=joints_pos, velocities=[0]*6, time_from_start=rospy.Duration(0.0)),
@@ -104,7 +104,7 @@ def move_interrupt():
         client.send_goal(g)
         time.sleep(3.0)
         print "Interrupting"
-        joint_states = rospy.wait_for_message("joint_states", JointState)
+        joint_states = rospy.wait_for_message("/neck/joint_states", JointState)
         joints_pos = joint_states.position
         g.trajectory.points = [
             JointTrajectoryPoint(positions=joints_pos, velocities=[0]*6, time_from_start=rospy.Duration(0.0)),
@@ -123,7 +123,10 @@ def main():
     global client
     try:
         rospy.init_node("test_move", anonymous=True, disable_signals=True)
-        client = actionlib.SimpleActionClient('follow_joint_trajectory', FollowJointTrajectoryAction)
+
+        #client = actionlib.SimpleActionClient('/Kinect2_Target_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
+	client = actionlib.SimpleActionClient('/neck/follow_joint_trajectory', FollowJointTrajectoryAction)
+
         print "Waiting for server..."
         client.wait_for_server()
         print "Connected to server"
@@ -140,10 +143,10 @@ def main():
         print "Please make sure that your robot can move freely between these poses before proceeding!"
         inp = raw_input("Continue? y/n: ")[0]
         if (inp == 'y'):
-            #move1()
+            move1()
             move_repeated()
-            #move_disordered()
-            #move_interrupt()
+            move_disordered()
+            move_interrupt()
         else:
             print "Halting program"
     except KeyboardInterrupt:

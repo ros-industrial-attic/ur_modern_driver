@@ -84,7 +84,7 @@ protected:
 
 public:
 	RosWrapper(std::string host, int reverse_port) :
-			as_(nh_, "follow_joint_trajectory",
+			as_(nh_, "/Kinect2_Target_controller/follow_joint_trajectory",
 					boost::bind(&RosWrapper::goalCB, this, _1),
 					boost::bind(&RosWrapper::cancelCB, this, _1), false), robot_(
 					rt_msg_cond_, msg_cond_, host, reverse_port, 0.03, 300), io_flag_delay_(0.05), joint_offsets_(
