@@ -62,9 +62,13 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/force_torque_sensor_interface.h>
 #include <hardware_interface/robot_hw.h>
-#include <controller_manager/controller_manager.h>
 #include <boost/scoped_ptr.hpp>
+
+#ifdef ROS_BUILD
+#include <controller_manager/controller_manager.h>
 #include <ros/ros.h>
+#endif // ROS_BUILD
+
 #include <math.h>
 #include "do_output.h"
 #include "ur_driver.h"
@@ -79,11 +83,20 @@ static const double VELOCITY_STEP_FACTOR = 1;
 class UrHardwareInterface: public hardware_interface::RobotHW {
 public:
 
+#ifdef ROS_BUILD
 	/**
 	 * \brief Constructor
 	 * \param nh - Node handle for topics.
 	 */
 	UrHardwareInterface(ros::NodeHandle& nh, UrDriver* robot);
+#else // ROS_BUILD
+
+	/**
+	 * \brief Constructor
+	 * \param nh - Node handle for topics.
+	 */
+	UrHardwareInterface(UrDriver* robot);
+#endif // ROS_BUILD
 
 	/// \brief Initialize the hardware interface
 	virtual void init();
@@ -103,9 +116,10 @@ public:
 			const std::list<hardware_interface::ControllerInfo>&stop_list);
 
 protected:
-
+#ifdef ROS_BUILD
 	// Startup and shutdown of the internal node inside a roscpp program
 	ros::NodeHandle nh_;
+#endif // ROS_BUILD
 
 	// Interfaces
 	hardware_interface::JointStateInterface joint_state_interface_;

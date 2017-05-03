@@ -44,14 +44,18 @@ UrCommunication::UrCommunication(std::condition_variable& msg_cond,
 	flag_ = 1;
 	setsockopt(pri_sockfd_, IPPROTO_TCP, TCP_NODELAY, (char *) &flag_,
 			sizeof(int));
+#ifndef __APPLE__
 	setsockopt(pri_sockfd_, IPPROTO_TCP, TCP_QUICKACK, (char *) &flag_,
 			sizeof(int));
+#endif
 	setsockopt(pri_sockfd_, SOL_SOCKET, SO_REUSEADDR, (char *) &flag_,
 			sizeof(int));
 	setsockopt(sec_sockfd_, IPPROTO_TCP, TCP_NODELAY, (char *) &flag_,
 			sizeof(int));
+#ifndef __APPLE__
 	setsockopt(sec_sockfd_, IPPROTO_TCP, TCP_QUICKACK, (char *) &flag_,
 			sizeof(int));
+#endif
 	setsockopt(sec_sockfd_, SOL_SOCKET, SO_REUSEADDR, (char *) &flag_,
 			sizeof(int));
 	fcntl(sec_sockfd_, F_SETFL, O_NONBLOCK);
@@ -73,8 +77,10 @@ bool UrCommunication::start() {
 	}
 	print_debug("Acquire firmware version: Got connection");
 	bytes_read = read(pri_sockfd_, buf, 512);
+#ifndef __APPLE__
 	setsockopt(pri_sockfd_, IPPROTO_TCP, TCP_QUICKACK, (char *) &flag_,
 			sizeof(int));
+#endif
 	robot_state_->unpack(buf, bytes_read);
 	//wait for some traffic so the UR socket doesn't die in version 3.1.
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -128,8 +134,10 @@ void UrCommunication::run() {
 			select(sec_sockfd_ + 1, &readfds, NULL, NULL, &timeout);
 			bytes_read = read(sec_sockfd_, buf, 2048); // usually only up to 1295 bytes
 			if (bytes_read > 0) {
+#ifndef __APPLE__
 				setsockopt(sec_sockfd_, IPPROTO_TCP, TCP_QUICKACK,
 						(char *) &flag_, sizeof(int));
+#endif
 				robot_state_->unpack(buf, bytes_read);
 			} else {
 				connected_ = false;
@@ -147,8 +155,10 @@ void UrCommunication::run() {
 			flag_ = 1;
 			setsockopt(sec_sockfd_, IPPROTO_TCP, TCP_NODELAY, (char *) &flag_,
 					sizeof(int));
+#ifndef __APPLE__
 			setsockopt(sec_sockfd_, IPPROTO_TCP, TCP_QUICKACK, (char *) &flag_,
 					sizeof(int));
+#endif
 			setsockopt(sec_sockfd_, SOL_SOCKET, SO_REUSEADDR, (char *) &flag_,
 					sizeof(int));
 			fcntl(sec_sockfd_, F_SETFL, O_NONBLOCK);
