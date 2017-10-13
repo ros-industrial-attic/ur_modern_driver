@@ -321,23 +321,23 @@ void RobotStateRT::unpack(uint8_t * buf) {
 	len = ntohl(len);
 
 	//Check the correct message length is received
-	bool len_good = true;
-	if (version_ >= 1.6 && version_ < 1.7) { //v1.6
-		if (len != 756)
-			len_good = false;
-	} else if (version_ >= 1.7 && version_ < 1.8) { //v1.7
-		if (len != 764)
-			len_good = false;
-	} else if (version_ >= 1.8 && version_ < 1.9) { //v1.8
-		if (len != 812)
-			len_good = false;
-	} else if (version_ >= 3.0 && version_ < 3.2) { //v3.0 & v3.1
-		if (len != 1044)
-			len_good = false;
-	} else if (version_ >= 3.2 && version_ < 3.3) { //v3.2
-		if (len != 1060)
-			len_good = false;
-	}
+        bool len_good = false;
+        if (version_ >= 1.6 && version_ < 1.7) { //v1.6
+                if (len == 756)
+                        len_good = true;
+        } else if (version_ >= 1.7 && version_ < 1.8) { //v1.7
+                if (len == 764)
+                        len_good = true;
+        } else if (version_ >= 1.8 && version_ < 1.9) { //v1.8
+                if (len == 812)
+                        len_good = true;
+        } else if (version_ >= 3.0 && version_ < 3.2) { //v3.0 & v3.1
+                if (len == 1044)
+                        len_good = true;
+        } else if (version_ >= 3.2 && version_ < 3.5) { //v3.2 ~ v3.4
+                if (len == 1060)
+                        len_good = true;
+        }
 
 	if (!len_good) {
 		printf("Wrong length of message on RT interface: %i\n", len);
