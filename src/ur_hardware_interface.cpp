@@ -51,7 +51,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************
-
  Author: Dave Coleman
  */
 
@@ -177,13 +176,13 @@ bool UrHardwareInterface::canSwitch(
 	for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
 			start_list.begin(); controller_it != start_list.end();
 			++controller_it) {
-		if (controller_it->hardware_interface
+		if (controller_it->claimed_resources.at(0).hardware_interface
 				== "hardware_interface::VelocityJointInterface") {
 			if (velocity_interface_running_) {
 				ROS_ERROR(
 						"%s: An interface of that type (%s) is already running",
 						controller_it->name.c_str(),
-						controller_it->hardware_interface.c_str());
+						controller_it->claimed_resources.at(0).hardware_interface.c_str());
 				return false;
 			}
 			if (position_interface_running_) {
@@ -192,7 +191,7 @@ bool UrHardwareInterface::canSwitch(
 						stop_list.begin();
 						stop_controller_it != stop_list.end();
 						++stop_controller_it) {
-					if (stop_controller_it->hardware_interface
+					if (stop_controller_it->claimed_resources.at(0).hardware_interface
 							== "hardware_interface::PositionJointInterface") {
 						error = false;
 						break;
@@ -202,17 +201,17 @@ bool UrHardwareInterface::canSwitch(
 					ROS_ERROR(
 							"%s (type %s) can not be run simultaneously with a PositionJointInterface",
 							controller_it->name.c_str(),
-							controller_it->hardware_interface.c_str());
+							controller_it->claimed_resources.at(0).hardware_interface.c_str());
 					return false;
 				}
 			}
-		} else if (controller_it->hardware_interface
+		} else if (controller_it->claimed_resources.at(0).hardware_interface
 				== "hardware_interface::PositionJointInterface") {
 			if (position_interface_running_) {
 				ROS_ERROR(
 						"%s: An interface of that type (%s) is already running",
 						controller_it->name.c_str(),
-						controller_it->hardware_interface.c_str());
+						controller_it->claimed_resources.at(0).hardware_interface.c_str());
 				return false;
 			}
 			if (velocity_interface_running_) {
@@ -221,7 +220,7 @@ bool UrHardwareInterface::canSwitch(
 						stop_list.begin();
 						stop_controller_it != stop_list.end();
 						++stop_controller_it) {
-					if (stop_controller_it->hardware_interface
+					if (stop_controller_it->claimed_resources.at(0).hardware_interface
 							== "hardware_interface::VelocityJointInterface") {
 						error = false;
 						break;
@@ -231,7 +230,7 @@ bool UrHardwareInterface::canSwitch(
 					ROS_ERROR(
 							"%s (type %s) can not be run simultaneously with a VelocityJointInterface",
 							controller_it->name.c_str(),
-							controller_it->hardware_interface.c_str());
+							controller_it->claimed_resources.at(0).hardware_interface.c_str());
 					return false;
 				}
 			}
@@ -248,12 +247,12 @@ void UrHardwareInterface::doSwitch(
 	for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
 			stop_list.begin(); controller_it != stop_list.end();
 			++controller_it) {
-		if (controller_it->hardware_interface
+		if (controller_it->claimed_resources.at(0).hardware_interface
 				== "hardware_interface::VelocityJointInterface") {
 			velocity_interface_running_ = false;
 			ROS_DEBUG("Stopping velocity interface");
 		}
-		if (controller_it->hardware_interface
+		if (controller_it->claimed_resources.at(0).hardware_interface
 				== "hardware_interface::PositionJointInterface") {
 			position_interface_running_ = false;
 			std::vector<double> tmp;
@@ -264,12 +263,12 @@ void UrHardwareInterface::doSwitch(
 	for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
 			start_list.begin(); controller_it != start_list.end();
 			++controller_it) {
-		if (controller_it->hardware_interface
+		if (controller_it->claimed_resources.at(0).hardware_interface
 				== "hardware_interface::VelocityJointInterface") {
 			velocity_interface_running_ = true;
 			ROS_DEBUG("Starting velocity interface");
 		}
-		if (controller_it->hardware_interface
+		if (controller_it->claimed_resources.at(0).hardware_interface
 				== "hardware_interface::PositionJointInterface") {
 			position_interface_running_ = true;
 			robot_->uploadProg();
@@ -280,4 +279,3 @@ void UrHardwareInterface::doSwitch(
 }
 
 } // namespace
-
