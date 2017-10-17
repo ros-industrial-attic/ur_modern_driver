@@ -98,7 +98,7 @@ public:
 		    if (joint_prefix.length() > 0) {
     			sprintf(buf, "Setting prefix to %s", joint_prefix.c_str());
 	    		print_info(buf);
-	        }	
+	        }
         }
 		joint_names.push_back(joint_prefix + "shoulder_pan_joint");
 		joint_names.push_back(joint_prefix + "shoulder_lift_joint");
@@ -315,7 +315,7 @@ private:
 			print_error(result_.error_string);
 			return;
 		}
-        
+
 		if (!has_velocities()) {
 			result_.error_code = result_.INVALID_GOAL;
 			result_.error_string = "Received a goal without velocities";
@@ -343,14 +343,6 @@ private:
 		}
 
 		reorder_traj_joints(goal.trajectory);
-		
-		if (!start_positions_match(goal.trajectory, 0.01)) {
-			result_.error_code = result_.INVALID_GOAL;
-			result_.error_string = "Goal start doesn't match current pose";
-			gh.setRejected(result_, result_.error_string);
-			print_error(result_.error_string);
-			return;
-		}
 
 		std::vector<double> timestamps;
 		std::vector<std::vector<double> > positions, velocities;
@@ -363,12 +355,19 @@ private:
 			velocities.push_back(
 					robot_.rt_interface_->robot_state_->getQdActual());
 		}
+		else if (!start_positions_match(goal.trajectory, 0.01)) {
+			result_.error_code = result_.INVALID_GOAL;
+			result_.error_string = "Goal start doesn't match current pose";
+			gh.setRejected(result_, result_.error_string);
+			print_error(result_.error_string);
+			return;
+		}
+
 		for (unsigned int i = 0; i < goal.trajectory.points.size(); i++) {
 			timestamps.push_back(
 					goal.trajectory.points[i].time_from_start.toSec());
 			positions.push_back(goal.trajectory.points[i].positions);
 			velocities.push_back(goal.trajectory.points[i].velocities);
-
 		}
 
 		goal_handle_.setAccepted();
@@ -609,7 +608,7 @@ private:
 
 			// Broadcast transform
 			if( tf_pub.trylock() )
-			{			
+			{
 				tf_pub.msg_.transforms[0].header.stamp = ros_time;
 				if (angle < 1e-16) {
 					tf_pub.msg_.transforms[0].transform.rotation.x = 0;
@@ -633,7 +632,7 @@ private:
 			std::vector<double> tcp_speed = robot_.rt_interface_->robot_state_->getTcpSpeedActual();
 
 			if( tool_vel_pub.trylock() )
-			{			
+			{
 				tool_vel_pub.msg_.header.stamp = ros_time;
 				tool_vel_pub.msg_.twist.linear.x = tcp_speed[0];
 				tool_vel_pub.msg_.twist.linear.y = tcp_speed[1];
