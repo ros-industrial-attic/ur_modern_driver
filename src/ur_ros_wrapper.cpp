@@ -48,6 +48,7 @@
 #include "ur_msgs/Digital.h"
 #include "ur_msgs/Analog.h"
 #include "std_msgs/String.h"
+#include "industrial_msgs/RobotStatus.h"
 #include <controller_manager/controller_manager.h>
 #include <realtime_tools/realtime_publisher.h>
 
@@ -98,7 +99,7 @@ public:
 		    if (joint_prefix.length() > 0) {
     			sprintf(buf, "Setting prefix to %s", joint_prefix.c_str());
 	    		print_info(buf);
-	        }	
+	        }
         }
 		joint_names.push_back(joint_prefix + "shoulder_pan_joint");
 		joint_names.push_back(joint_prefix + "shoulder_lift_joint");
@@ -315,7 +316,7 @@ private:
 			print_error(result_.error_string);
 			return;
 		}
-        
+
 		if (!has_velocities()) {
 			result_.error_code = result_.INVALID_GOAL;
 			result_.error_string = "Received a goal without velocities";
@@ -343,7 +344,7 @@ private:
 		}
 
 		reorder_traj_joints(goal.trajectory);
-		
+
 		if (!start_positions_match(goal.trajectory, 0.01)) {
 			result_.error_code = result_.INVALID_GOAL;
 			result_.error_string = "Goal start doesn't match current pose";
@@ -609,7 +610,7 @@ private:
 
 			// Broadcast transform
 			if( tf_pub.trylock() )
-			{			
+			{
 				tf_pub.msg_.transforms[0].header.stamp = ros_time;
 				if (angle < 1e-16) {
 					tf_pub.msg_.transforms[0].transform.rotation.x = 0;
@@ -633,7 +634,7 @@ private:
 			std::vector<double> tcp_speed = robot_.rt_interface_->robot_state_->getTcpSpeedActual();
 
 			if( tool_vel_pub.trylock() )
-			{			
+			{
 				tool_vel_pub.msg_.header.stamp = ros_time;
 				tool_vel_pub.msg_.twist.linear.x = tcp_speed[0];
 				tool_vel_pub.msg_.twist.linear.y = tcp_speed[1];
@@ -730,6 +731,9 @@ private:
 		ros::Publisher io_pub = nh_.advertise<ur_msgs::IOStates>(
 				"ur_driver/io_states", 1);
 
+		ros::Publisher robotStatus_pub = nh_.advertise<industrial_msgs::RobotStatus>(
+				"robot_status", 1);
+
 		while (ros::ok()) {
 			ur_msgs::IOStates io_msg;
 			std::mutex msg_lock; // The values are locked for reading in the class, so just use a dummy mutex
@@ -790,6 +794,39 @@ private:
 				warned = false;
 
 			robot_.sec_interface_->robot_state_->finishedReading();
+
+            // RobotStatus pusblisher
+            industrial_msgs::RobotStatus robotStatus = industrial_msgs::RobotStatus();
+
+            robotStatus.mode.val = -1;
+            robotStatus.header.stamp = ros::Time::now();
+
+            bool isEmergencyStopped = robot_.sec_interface_->robot_state_->isEmergencyStopped();
+            bool isProtectiveStopped = robot_.sec_interface_->robot_state_->isProtectiveStopped();
+            if(isEmergencyStopped || isProtectiveStopped){
+                robotStatus.in_error.val = 1;
+                robotStatus.error_code = isEmergencyStopped ? 1 : 2; // 1 is Emergency stop, 2 is protective stopped
+            }
+            else{
+                int mode = robot_.sec_interface_->robot_state_->getRobotMode();
+                if(mode == 5 || mode == 3){
+                    robotStatus.e_stopped.val = 1;
+                    robotStatus.error_code = mode == 5 ? 3 : 4; // 3 is idle, 4 is power_off
+                }
+                else if(mode == 7){
+                    robotStatus.drives_powered.val = 1;
+                    if(robot_.sec_interface_->robot_state_->isProgramRunning()){
+                        robotStatus.in_motion.val = 1;
+                    }
+                    else{
+                        robotStatus.motion_possible.val = 1;
+                    }
+                }
+            }
+
+
+            robotStatus_pub.publish(robotStatus);
+
 
 		}
 	}
