@@ -47,6 +47,8 @@
 #include "ur_msgs/IOStates.h"
 #include "ur_msgs/Digital.h"
 #include "ur_msgs/Analog.h"
+#include "ur_msgs/MasterboardDataMsg.h"
+#include "ur_modern_driver/RobotModeDataMsg.h"
 #include "std_msgs/String.h"
 #include <controller_manager/controller_manager.h>
 #include <realtime_tools/realtime_publisher.h>
@@ -729,6 +731,10 @@ private:
 		bool warned = false;
 		ros::Publisher io_pub = nh_.advertise<ur_msgs::IOStates>(
 				"ur_driver/io_states", 1);
+		ros::Publisher masterboard_state_pub = nh_.advertise<ur_msgs::MasterboardDataMsg>(
+				"ur_driver/masterboard_state", 1);
+		ros::Publisher robot_mode_state_pub = nh_.advertise<ur_modern_driver::RobotModeDataMsg>(
+				"ur_driver/robot_mode_state", 1);
 
 		while (ros::ok()) {
 			ur_msgs::IOStates io_msg;
@@ -767,6 +773,41 @@ private:
 			ana.state = robot_.sec_interface_->robot_state_->getAnalogOutput1();
 			io_msg.analog_out_states.push_back(ana);
 			io_pub.publish(io_msg);
+
+			ur_msgs::MasterboardDataMsg masterboard_msg;
+			masterboard_msg.digital_input_bits = robot_.sec_interface_->robot_state_->getDigitalInputBits();
+			masterboard_msg.digital_output_bits = robot_.sec_interface_->robot_state_->getDigitalOutputBits();
+			masterboard_msg.analog_input_range0 = robot_.sec_interface_->robot_state_->getAnalogInputRange0();
+			masterboard_msg.analog_input_range1 = robot_.sec_interface_->robot_state_->getAnalogInputRange1();
+			masterboard_msg.analog_input0 = robot_.sec_interface_->robot_state_->getAnalogInput0();
+			masterboard_msg.analog_input1 = robot_.sec_interface_->robot_state_->getAnalogInput1();
+			masterboard_msg.analog_output_domain0 = robot_.sec_interface_->robot_state_->getAnalogOutputDomain0();
+			masterboard_msg.analog_output_domain1 = robot_.sec_interface_->robot_state_->getAnalogOutputDomain1();
+			masterboard_msg.analog_output0 = robot_.sec_interface_->robot_state_->getAnalogOutput0();
+			masterboard_msg.analog_output1 = robot_.sec_interface_->robot_state_->getAnalogOutput1();
+			masterboard_msg.masterboard_temperature = robot_.sec_interface_->robot_state_->getMasterBoardTemperature();
+			masterboard_msg.robot_voltage_48V = robot_.sec_interface_->robot_state_->getRobotVoltage48V();
+			masterboard_msg.robot_current = robot_.sec_interface_->robot_state_->getRobotCurrent();
+			masterboard_msg.master_io_current = robot_.sec_interface_->robot_state_->getMasterIOCurrent();
+			masterboard_msg.master_safety_state = robot_.sec_interface_->robot_state_->getSafetyMode();
+			masterboard_msg.master_onoff_state = robot_.sec_interface_->robot_state_->getMasterOnOffState();
+			masterboard_state_pub.publish(masterboard_msg);
+
+			ur_modern_driver::RobotModeDataMsg robot_mode_msg;
+			robot_mode_msg.timestamp = robot_.sec_interface_->robot_state_->getTimeStamp();
+			robot_mode_msg.is_robot_connected = robot_.sec_interface_->robot_state_->isRobotConnected();
+			robot_mode_msg.is_real_robot_enabled = robot_.sec_interface_->robot_state_->isRealRobotEnabled();
+			robot_mode_msg.is_power_on_robot = robot_.sec_interface_->robot_state_->isPowerOnRobot();
+			robot_mode_msg.is_emergency_stopped = robot_.sec_interface_->robot_state_->isEmergencyStopped();
+			robot_mode_msg.is_protective_stopped = robot_.sec_interface_->robot_state_->isProtectiveStopped();
+			robot_mode_msg.is_program_running = robot_.sec_interface_->robot_state_->isProgramRunning();
+			robot_mode_msg.is_program_paused = robot_.sec_interface_->robot_state_->isProgramPaused();
+			robot_mode_msg.robot_mode = robot_.sec_interface_->robot_state_->getRobotMode();
+			robot_mode_msg.control_mode = robot_.sec_interface_->robot_state_->getControlMode();
+			robot_mode_msg.target_speed_fraction = robot_.sec_interface_->robot_state_->getTargetSpeedFraction();
+			robot_mode_msg.speed_scaling = robot_.sec_interface_->robot_state_->getSpeedScaling();
+			robot_mode_msg.is_ready = robot_.sec_interface_->robot_state_->isReady();
+			robot_mode_state_pub.publish(robot_mode_msg);
 
 			if (robot_.sec_interface_->robot_state_->isEmergencyStopped()
 					or robot_.sec_interface_->robot_state_->isProtectiveStopped()) {

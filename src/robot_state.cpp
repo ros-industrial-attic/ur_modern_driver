@@ -336,18 +336,51 @@ int RobotState::getDigitalInputBits() {
 int RobotState::getDigitalOutputBits() {
 	return mb_data_.digitalOutputBits;
 }
+char RobotState::getAnalogInputRange0() {
+	return mb_data_.analogInputRange0;
+}
+char RobotState::getAnalogInputRange1() {
+	return mb_data_.analogInputRange1;
+}
 double RobotState::getAnalogInput0() {
 	return mb_data_.analogInput0;
 }
 double RobotState::getAnalogInput1() {
 	return mb_data_.analogInput1;
 }
+char RobotState::getAnalogOutputDomain0() {
+	return mb_data_.analogOutputDomain0;
+}
+char RobotState::getAnalogOutputDomain1() {
+	return mb_data_.analogOutputDomain1;
+}
 double RobotState::getAnalogOutput0() {
 	return mb_data_.analogOutput0;
-
 }
 double RobotState::getAnalogOutput1() {
 	return mb_data_.analogOutput1;
+}
+float RobotState::getMasterBoardTemperature() {
+	return mb_data_.masterBoardTemperature;
+}
+float RobotState::getRobotVoltage48V() {
+	return mb_data_.robotVoltage48V;
+}
+float RobotState::getRobotCurrent() {
+	return mb_data_.robotCurrent;
+}
+float RobotState::getMasterIOCurrent() {
+	return mb_data_.masterIOCurrent;
+}
+unsigned char RobotState::getSafetyMode() {
+	return mb_data_.safetyMode;
+}
+unsigned char RobotState::getMasterOnOffState() {
+	return mb_data_.masterOnOffState;
+}
+
+uint64_t RobotState::getTimeStamp() {
+	return robot_mode_.timestamp;
 }
 bool RobotState::isRobotConnected() {
 	return robot_mode_.isRobotConnected;
@@ -372,6 +405,15 @@ bool RobotState::isProgramPaused() {
 }
 unsigned char RobotState::getRobotMode() {
 	return robot_mode_.robotMode;
+}
+unsigned char RobotState::getControlMode() {
+	return robot_mode_.controlMode;
+}
+double RobotState::getTargetSpeedFraction() {
+	return robot_mode_.targetSpeedFraction;
+}
+double RobotState::getSpeedScaling() {
+	return robot_mode_.speedScaling;
 }
 bool RobotState::isReady() {
 	if (robot_mode_.robotMode == robot_mode_running_) {

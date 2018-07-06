@@ -184,13 +184,14 @@ public:
 	float getRobotCurrent();
 	float getMasterIOCurrent();
 	unsigned char getSafetyMode();
-	unsigned char getInReducedMode();
+	unsigned char getMasterOnOffState();
 	char getEuromap67InterfaceInstalled();
 	int getEuromapInputBits();
 	int getEuromapOutputBits();
 	float getEuromapVoltage();
 	float getEuromapCurrent();
 
+	uint64_t getTimeStamp();
 	bool isRobotConnected();
 	bool isRealRobotEnabled();
 	bool isPowerOnRobot();
@@ -199,6 +200,9 @@ public:
 	bool isProgramRunning();
 	bool isProgramPaused();
 	unsigned char getRobotMode();
+	unsigned char getControlMode();
+	double getTargetSpeedFraction();
+	double getSpeedScaling();
 	bool isReady();
 
 	void setDisconnected();
