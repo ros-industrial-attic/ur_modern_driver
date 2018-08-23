@@ -23,7 +23,7 @@ A new driver for the UR3/UR5/UR10 robot arms from Universal Robots. It is design
 
 * Besides this, the driver subscribes to two new topics:
 
-  * */ur\_driver/URScript* : Takes messages of type _std\_msgs/String_ and directly forwards it to the robot. Note that no control is done on the input, so use at your own risk! Intended for sending movel/movej commands directly to the robot, conveyor tracking and the like.
+  * */ur\_driver/URScript* : Takes messages of type _std\_msgs/String_ and directly forwards it to the robot. Note that no control is done on the input, so use at your own risk! Intended for sending movel/movej commands directly to the robot, conveyor tracking and the like. Completion can be checked with the */ur\_driver/program_running* topic. Include *ur_modern_driver/wait_for_program.h* for a convenience function.
 
   * */joint\_speed* : Takes messages of type _trajectory\_msgs/JointTrajectory_. Parses the first JointTrajectoryPoint and sends the specified joint speeds and accelerations to the robot. This interface is intended for doing visual servoing and other kind of control that requires speed control rather than position control of the robot. Remember to set values for all 6 joints. Ignores the field joint\_names, so set the values in the correct order.
 
@@ -34,7 +34,7 @@ A new driver for the UR3/UR5/UR10 robot arms from Universal Robots. It is design
     * The velocity based controller sends joint speed commands to the robot, using the speedj command
     * The position based controller sends joint position commands to the robot, using the servoj command
     * I have so far only used the velocity based controller, but which one is optimal depends on the application.
-  * As ros_control continuesly controls the robot, using the teach pendant while a controller is running will cause the controller **on the robot** to crash, as it obviously can't handle conflicting control input from two sources. Thus be sure to stop the running controller **before** moving the robot via the teach pendant:
+  * As ros_control continuously controls the robot, using the teach pendant while a controller is running will cause the controller **on the robot** to crash, as it obviously can't handle conflicting control input from two sources. Thus be sure to stop the running controller **before** moving the robot via the teach pendant:
     * A list of the loaded and running controllers can be found by a call to the controller_manager ```rosservice call /controller_manager/list_controllers {} ```
     * The running position trajectory controller can be stopped with a call to  ```rosservice call /universal_robot/controller_manager/switch_controller "start_controllers: - '' stop_controllers: - 'pos_based_pos_traj_controller' strictness: 1" ``` (Remember you can use tab-completion for this)
 
@@ -168,13 +168,9 @@ Should be compatible with all robots and control boxes with the newest firmware.
 
 ### Tested with:
 
-* Real UR10 with CB2 running 1.8.14035
-* Real UR5 with CB2 running 1.8.14035
-* Simulated UR3 running 3.1.18024
-* Simulated UR5 running 3.0.16471
-* Simulated UR5 running 1.8.16941
-* Simulated UR5 running 1.7.10857
-* Simulated UR5 running 1.6.08725
+*Real UR5 and UR3 with 3.5.1.1.10661 (Dec 13 2017)
+
+*Real UR10 with CB2 running 1.8.14035
 
 
 # Credits
