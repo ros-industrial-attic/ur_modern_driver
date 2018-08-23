@@ -1,6 +1,7 @@
 #pragma once
 
 #include <industrial_msgs/RobotStatus.h>
+#include <std_msgs/Bool.h>
 #include <ros/ros.h>
 #include <ur_msgs/Analog.h>
 #include <ur_msgs/Digital.h>
@@ -16,6 +17,7 @@ private:
   NodeHandle nh_;
   Publisher io_pub_;
   Publisher status_pub_;
+  Publisher program_running_pub_;
 
   template <size_t N>
   inline void appendDigital(std::vector<ur_msgs::Digital>& vec, std::bitset<N> bits)
@@ -35,9 +37,9 @@ private:
   void publishRobotStatus(const RobotModeData_V3_0__1& data) const;
 
 public:
-  MBPublisher()
-    : io_pub_(nh_.advertise<ur_msgs::IOStates>("ur_driver/io_states", 1))
-    , status_pub_(nh_.advertise<industrial_msgs::RobotStatus>("ur_driver/robot_status", 1))
+  MBPublisher() : io_pub_(nh_.advertise<ur_msgs::IOStates>("ur_driver/io_states", 1))
+                , status_pub_(nh_.advertise<industrial_msgs::RobotStatus>("ur_driver/robot_status", 1))
+                , program_running_pub_(nh_.advertise<std_msgs::Bool>("ur_driver/program_running", 1))
   {
   }
 

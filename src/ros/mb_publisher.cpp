@@ -21,7 +21,7 @@ void MBPublisher::publish(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data
 void MBPublisher::publishRobotStatus(industrial_msgs::RobotStatus& status, const SharedRobotModeData& data) const
 {
   // note that this is true as soon as the drives are powered,
-  // even if the breakes are still closed
+  // even if the breaks are still closed
   // which is in slight contrast to the comments in the
   // message definition
   status.drives_powered.val = data.robot_power_on;
@@ -42,6 +42,12 @@ void MBPublisher::publishRobotStatus(industrial_msgs::RobotStatus& status, const
   status.in_error.val = data.protective_stopped;
 
   status_pub_.publish(status);
+
+  // The program_running status variable can be used to check if a
+  // script sent via /ur_driver/URScript has terminated.
+  std_msgs::Bool program_running;
+  program_running.data = data.program_running;
+  program_running_pub_.publish(program_running);
 }
 
 void MBPublisher::publishRobotStatus(const RobotModeData_V1_X& data) const
