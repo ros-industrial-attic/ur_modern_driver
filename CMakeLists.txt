@@ -25,6 +25,16 @@ find_package(catkin REQUIRED
 )
 
 
+add_message_files(
+  FILES
+  RobotModeDataMsg.msg
+)
+generate_messages(
+  DEPENDENCIES
+  control_msgs
+  ur_msgs
+)
+
 catkin_package(
   INCLUDE_DIRS
     include

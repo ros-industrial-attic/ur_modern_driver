@@ -20,10 +20,11 @@ A new driver for the UR3/UR5/UR10 robot arms from Universal Robots. It is design
 
   * Service call to set outputs and payload - Again, the string */ur\_driver* has been prepended compared to the old driver (Note: I am not sure if setting the payload actually works, as the robot GUI does not update. This is also true for the old ur\_driver  )
 
+  * Additionally, the masterboard state and robot mode are published to */ur\_driver/masterboard\_state* and */ur\_driver/robot\_mode\_state*. (Note: Only the parameters that are shared between all robot firmwares are published. The `digital_input_bits` and `digital_output_bits` fields of the MasterboardDataMsg are not set. Use the IOStates message for these.)
 
 * Besides this, the driver subscribes to two new topics:
 
-  * */ur\_driver/URScript* : Takes messages of type _std\_msgs/String_ and directly forwards it to the robot. Note that no control is done on the input, so use at your own risk! Intended for sending movel/movej commands directly to the robot, conveyor tracking and the like. Completion can be checked with the */ur\_driver/program_running* topic. Include *ur_modern_driver/wait_for_program.h* for a convenience function.
+  * */ur\_driver/URScript* : Takes messages of type _std\_msgs/String_ and directly forwards it to the robot. Note that no control is done on the input, so use at your own risk! Intended for sending movel/movej commands directly to the robot, conveyor tracking and the like. Completion can be checked with the */ur\_driver/robot_mode_state* topic. Include *ur_modern_driver/wait_for_program.h* for a convenience function.
 
   * */joint\_speed* : Takes messages of type _trajectory\_msgs/JointTrajectory_. Parses the first JointTrajectoryPoint and sends the specified joint speeds and accelerations to the robot. This interface is intended for doing visual servoing and other kind of control that requires speed control rather than position control of the robot. Remember to set values for all 6 joints. Ignores the field joint\_names, so set the values in the correct order.
 

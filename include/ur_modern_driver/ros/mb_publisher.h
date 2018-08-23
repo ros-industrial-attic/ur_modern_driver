@@ -6,6 +6,8 @@
 #include <ur_msgs/Analog.h>
 #include <ur_msgs/Digital.h>
 #include <ur_msgs/IOStates.h>
+#include <ur_msgs/MasterboardDataMsg.h>
+#include <ur_modern_driver/RobotModeDataMsg.h>
 
 #include "ur_modern_driver/ur/consumer.h"
 
@@ -17,7 +19,8 @@ private:
   NodeHandle nh_;
   Publisher io_pub_;
   Publisher status_pub_;
-  Publisher program_running_pub_;
+  Publisher masterboard_state_pub_;
+  Publisher robot_mode_state_pub_;
 
   template <size_t N>
   inline void appendDigital(std::vector<ur_msgs::Digital>& vec, std::bitset<N> bits)
@@ -39,7 +42,8 @@ private:
 public:
   MBPublisher() : io_pub_(nh_.advertise<ur_msgs::IOStates>("ur_driver/io_states", 1))
                 , status_pub_(nh_.advertise<industrial_msgs::RobotStatus>("ur_driver/robot_status", 1))
-                , program_running_pub_(nh_.advertise<std_msgs::Bool>("ur_driver/program_running", 1))
+                , masterboard_state_pub_(nh_.advertise<ur_msgs::MasterboardDataMsg>("ur_driver/masterboard_state", 1))
+                , robot_mode_state_pub_(nh_.advertise<ur_modern_driver::RobotModeDataMsg>("ur_driver/robot_mode_state", 1))
   {
   }
 
