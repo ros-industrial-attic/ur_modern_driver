@@ -12,8 +12,8 @@ bool isProgramRunning(std::string topic_namespace = "")
   sharedPtr  = ros::topic::waitForMessage<ur_modern_driver::RobotModeDataMsg>(topic_namespace + "/ur_driver/robot_mode_state", ros::Duration(2));
   if (sharedPtr == NULL)
   {
-    ROS_ERROR("No message received from the robot. Is everything running? Is the namespace set correctly?");
-    return false;
+    ROS_ERROR("No message received from the robot. Is everything running? Is the namespace set correctly? Returning true.");
+    return true;  // If the function is used as intended (as a check after sending a custom program) then returning true is safer.
   }
   else
   {
