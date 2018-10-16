@@ -117,3 +117,17 @@ public:
 
   static_assert(RTState_V3_2__3::SIZE == 936, "RTState_V3_2__3 has mismatched size!");
 };
+
+class RTState_V3_5__5_1 : public RTState_V3_2__3
+{
+public:
+  bool parseWith(BinParser& bp);
+  virtual bool consumeWith(URRTPacketConsumer& consumer);
+
+  double3_t elbow_position;
+  double3_t elbow_velocity;
+
+  static const size_t SIZE = RTState_V3_2__3::SIZE + sizeof(double3_t) * 2;
+
+  static_assert(RTState_V3_5__5_1::SIZE == 984, "RTState_V3_5__5_1 has mismatched size!");
+};
