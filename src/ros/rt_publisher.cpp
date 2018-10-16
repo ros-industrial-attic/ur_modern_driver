@@ -117,3 +117,7 @@ bool RTPublisher::consume(RTState_V3_2__3& state)
 {
   return publish(state);
 }
+bool RTPublisher::consume(RTState_V3_5__5_1& state)
+{
+  return publish(state);
+}
