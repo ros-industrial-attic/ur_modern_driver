@@ -159,6 +159,56 @@ TEST(RTState_V3_2__3, testRandomDataParsing)
   EXPECT_TRUE(bp.empty()) << "did not consume all data";
 }
 
+TEST(RTState_V3_5__5_1, testRandomDataParsing)
+{
+  RandomDataTest rdt(1108);
+  BinParser bp = rdt.getParser(true);
+  RTState_V3_5__5_1 state;
+  EXPECT_TRUE(state.parseWith(bp)) << "parse() returned false";
+
+  ASSERT_EQ(rdt.getNext<double>(), state.time);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.q_target);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.qd_target);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.qdd_target);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.i_target);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.m_target);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.q_actual);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.qd_actual);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.i_actual);
+
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.i_control);
+  ASSERT_EQ(rdt.getNext<cartesian_coord_t>(), state.tool_vector_actual);
+  ASSERT_EQ(rdt.getNext<cartesian_coord_t>(), state.tcp_speed_actual);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.tcp_force);
+  ASSERT_EQ(rdt.getNext<cartesian_coord_t>(), state.tool_vector_target);
+  ASSERT_EQ(rdt.getNext<cartesian_coord_t>(), state.tcp_speed_target);
+
+  ASSERT_EQ(rdt.getNext<uint64_t>(), state.digital_inputs);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.motor_temperatures);
+  ASSERT_EQ(rdt.getNext<double>(), state.controller_time);
+  rdt.skip(sizeof(double));  // skip unused value
+  ASSERT_EQ(rdt.getNext<double>(), state.robot_mode);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.joint_modes);
+  ASSERT_EQ(rdt.getNext<double>(), state.safety_mode);
+  rdt.skip(sizeof(double) * 6);
+  ASSERT_EQ(rdt.getNext<double3_t>(), state.tool_accelerometer_values);
+  rdt.skip(sizeof(double) * 6);
+  ASSERT_EQ(rdt.getNext<double>(), state.speed_scaling);
+  ASSERT_EQ(rdt.getNext<double>(), state.linear_momentum_norm);
+  rdt.skip(sizeof(double) * 2);
+  ASSERT_EQ(rdt.getNext<double>(), state.v_main);
+  ASSERT_EQ(rdt.getNext<double>(), state.v_robot);
+  ASSERT_EQ(rdt.getNext<double>(), state.i_robot);
+  ASSERT_DOUBLE_ARRAY_EQ(rdt.getNext<double>(), state.v_actual);
+  ASSERT_EQ(rdt.getNext<uint64_t>(), state.digital_outputs);
+  ASSERT_EQ(rdt.getNext<double>(), state.program_state);
+
+  ASSERT_EQ(rdt.getNext<double3_t>(), state.elbow_position);
+  ASSERT_EQ(rdt.getNext<double3_t>(), state.elbow_velocity);
+
+  EXPECT_TRUE(bp.empty()) << "did not consume all data";
+}
+
 TEST(RTState_V1_6__7, testTooSmallBuffer)
 {
   RandomDataTest rdt(10);
@@ -188,5 +238,13 @@ TEST(RTState_V3_2__3, testTooSmallBuffer)
   RandomDataTest rdt(10);
   BinParser bp = rdt.getParser(true);
   RTState_V3_2__3 state;
+  EXPECT_FALSE(state.parseWith(bp)) << "parse() should fail when buffer not big enough";
+}
+
+TEST(RTState_V3_5__5_1, testTooSmallBuffer)
+{
+  RandomDataTest rdt(10);
+  BinParser bp = rdt.getParser(true);
+  RTState_V3_5__5_1 state;
   EXPECT_FALSE(state.parseWith(bp)) << "parse() should fail when buffer not big enough";
 }
