@@ -3,6 +3,7 @@
 ROSController::ROSController(URCommander& commander, TrajectoryFollower& follower,
                              std::vector<std::string>& joint_names, double max_vel_change, std::string tcp_link)
   : controller_(this, nh_)
+  , state_initialized_(false)
   , joint_interface_(joint_names)
   , wrench_interface_(tcp_link)
   , position_interface_(follower, joint_interface_, joint_names)
@@ -79,6 +80,7 @@ void ROSController::reset()
 
 void ROSController::read(RTShared& packet)
 {
+  state_initialized_ = true;
   joint_interface_.update(packet);
   wrench_interface_.update(packet);
 }
@@ -111,7 +113,8 @@ bool ROSController::update()
 
 void ROSController::onTimeout()
 {
-  update();
+  if (state_initialized_)
+    update();
 }
 
 void ROSController::onRobotStateChange(RobotState state)
