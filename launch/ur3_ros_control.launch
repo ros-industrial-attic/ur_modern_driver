@@ -6,7 +6,7 @@
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
   <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
 
-  <arg name="robot_ip"/>
+  <arg name="robot_ip" default="192.168.1.1"/>
   <arg name="limited" default="false"/>
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="3.0"/>
@@ -19,7 +19,6 @@
     <arg name="limited" value="$(arg limited)"/>
   </include>
 
-
   <!-- Load hardware interface -->
   <node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="log" launch-prefix="$(arg launch_prefix)">
     <param name="robot_ip_address" type="str" value="$(arg robot_ip)"/>
@@ -27,7 +26,12 @@
     <param name="max_payload" type="double" value="$(arg max_payload)"/>
     <param name="max_velocity" type="double" value="$(arg max_velocity)"/>
     <param name="use_ros_control" type="bool" value="True"/>
-    <param name="servoj_gain" type="double" value="750" />
+
+    <param name="servoj_time" type="double" value="0.008" />
+    <param name="servoj_gain" type="double" value="600" />
+    <param name="servoj_lookahead_time" type="double" value="0.10" />
+    <param name="speedj_time" type="double" value="0.048" />
+
     <param name="prefix" value="$(arg prefix)" />
     <param name="base_frame" type="str" value="$(arg base_frame)"/>
     <param name="tool_frame" type="str" value="$(arg tool_frame)"/>
@@ -45,6 +49,6 @@
     output="screen" args="load vel_based_pos_traj_controller" />
 
   <!-- Convert joint states to /tf tranforms -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="log"/>
 
 </launch>

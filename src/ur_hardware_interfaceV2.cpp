@@ -73,6 +73,9 @@ void UrHardwareInterface::init() {
 	ROS_INFO_STREAM_NAMED("ur_hardware_interface",
 			"Reading rosparams from namespace: " << nh_.getNamespace());
 
+	// subscribe to emergency status topic
+	ros::Subscriber safety_sub_ = nh_.subscribe("ur_driver/safety_state", 1, &UrHardwareInterface::safetyStateCb, this);
+	
 	// Get joint names
 	nh_.getParam("hardware_interface/joints", joint_names_);
 	if (joint_names_.size() == 0) {
@@ -128,6 +131,11 @@ void UrHardwareInterface::init() {
 	position_interface_running_ = false;
 }
 
+void UrHardwareInterface::safetyStateCb(const ur_msgs::RobotSafetyState::Ptr& msg) {
+	isEmergencyStopped = msg.isEmergencyStopped;
+	isProtectiveStopped = msg.isProtectiveStopped;
+}
+
 void UrHardwareInterface::read() {
 	std::vector<double> pos, vel, current, tcp;
 	pos = robot_->rt_interface_->robot_state_->getQActual();
@@ -151,7 +159,10 @@ void UrHardwareInterface::setMaxVelChange(double inp) {
 }
 
 void UrHardwareInterface::write() {
-	if (velocity_interface_running_) {
+	if ( isEmergencyStopped or isProtectiveStopped ) {
+		print_info("robot is protective/emergency stopped!!");
+	}
+	else if (velocity_interface_running_) {
 		std::vector<double> cmd;
 		//do some rate limiting
 		cmd.resize(joint_velocity_command_.size());

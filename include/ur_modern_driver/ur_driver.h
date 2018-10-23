@@ -96,6 +96,12 @@ public:
 	void setServojLookahead(double t);
 	void setServojGain(double g);
 
+	//-----------------
+	void speedlMove(double xSpeed, double ySpeed, double zSpeed, double xRotation, double yRotation, double zRotation, double linearAcceleration, double duration, double rotationAcceleration);
+	void enterFreeDriveMode();
+	void exitFreeDriveMode();
+	//-----------------
+
 };
 
 #endif /* UR_DRIVER_H_ */

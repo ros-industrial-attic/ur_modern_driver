@@ -46,7 +46,7 @@ pos_based_pos_traj_controller:
       wrist_3_joint: {trajectory: 0.1, goal: 0.1}
    stop_trajectory_duration: 0.5
    state_publish_rate:  125
-   action_monitor_rate: 10
+   action_monitor_rate: 125
 
    # state_publish_rate:  50 # Defaults to 50
    # action_monitor_rate: 20 # Defaults to 20
@@ -64,26 +64,33 @@ vel_based_pos_traj_controller:
      - wrist_2_joint
      - wrist_3_joint
    constraints:
-      goal_time: 0.6
-      stopped_velocity_tolerance: 0.05
-      shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
-      shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
-      elbow_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_1_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_2_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_3_joint: {trajectory: 0.1, goal: 0.1}
-   stop_trajectory_duration: 0.5
+      goal_time: 0.0
+      stopped_velocity_tolerance: 0.01
+      shoulder_pan_joint: {trajectory: 0.0, goal: 0.0}
+      shoulder_lift_joint: {trajectory: 0.0, goal: 0.0}
+      elbow_joint: {trajectory: 0.0, goal: 0.0}
+      wrist_1_joint: {trajectory: 0.0, goal: 0.0}
+      wrist_2_joint: {trajectory: 0.0, goal: 0.0}
+      wrist_3_joint: {trajectory: 0.0, goal: 0.0}
+   stop_trajectory_duration: 0.0
    state_publish_rate:  125
-   action_monitor_rate: 10
+   action_monitor_rate: 125
    gains:
-      #!!These values have not been optimized!!
-      shoulder_pan_joint: {p: 50.0,  i: 0.0, d: 0.1, i_clamp: 1}
-      shoulder_lift_joint: {p: 50.0,  i: 0.0, d: 0.1, i_clamp: 1}
-      elbow_joint: {p: 50.0,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_1_joint: {p: 50.0,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_2_joint: {p: 50.0,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_3_joint: {p: 50.0,  i: 0.0, d: 0.1, i_clamp: 1}
-
+      # these values have been adjusted but could always get better
+      shoulder_pan_joint: {p: 10.0,  i: 0.05, d: 0.005, i_clamp: 1}
+      shoulder_lift_joint: {p: 10.0,  i: 0.05, d: 0.005, i_clamp: 1}
+      elbow_joint: {p: 10.0,  i: 0.05, d: 0.005, i_clamp: 1}
+      wrist_1_joint: {p: 15.0,  i: 0.15, d: 0.005, i_clamp: 1}
+      wrist_2_joint: {p: 15.0,  i: 0.15, d: 0.005, i_clamp: 1}
+      wrist_3_joint: {p: 15.0,  i: 0.15, d: 0.005, i_clamp: 1}
    # state_publish_rate:  50 # Defaults to 50
    # action_monitor_rate: 20 # Defaults to 20
    #hold_trajectory_duration: 0 # Defaults to 0.5
+
+
+      # shoulder_pan_joint: {p: 10.0,  i: 0.15, d: 0.09, i_clamp: 1}
+      # shoulder_lift_joint: {p: 10.0,  i: 0.15, d: 0.09, i_clamp: 1}
+      # elbow_joint: {p: 10.0,  i: 0.15, d: 0.09, i_clamp: 1}
+      # wrist_1_joint: {p: 12.0,  i: 0.15, d: 0.09, i_clamp: 1}
+      # wrist_2_joint: {p: 15.0,  i: 0.15, d: 0.09, i_clamp: 1}
+      # wrist_3_joint: {p: 15.0,  i: 0.15, d: 0.09, i_clamp: 1}
