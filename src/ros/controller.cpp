@@ -80,9 +80,9 @@ void ROSController::reset()
 
 void ROSController::read(RTShared& packet)
 {
-  state_initialized_ = true;
   joint_interface_.update(packet);
   wrench_interface_.update(packet);
+  state_initialized_ = true;
 }
 
 bool ROSController::update()
