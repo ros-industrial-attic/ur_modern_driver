@@ -85,5 +85,7 @@ public:
     return update();
   }
 
+  virtual void onTimeout();
+
   virtual void onRobotStateChange(RobotState state);
 };

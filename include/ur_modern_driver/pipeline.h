@@ -159,10 +159,11 @@ private:
     unique_ptr<T> product;
     while (running_)
     {
-      // 16000us timeout was chosen because we should
-      // roughly recieve messages at 125hz which is every
-      // 8ms so double it for some error margin
-      if (!queue_.wait_dequeue_timed(product, std::chrono::milliseconds(16)))
+      // timeout was chosen because we should receive messages
+      // at roughly 125hz (every 8ms) and have to update
+      // the controllers (i.e. the consumer) with *at least* 125Hz
+      // So we update the consumer more frequently via onTimeout
+      if (!queue_.wait_dequeue_timed(product, std::chrono::milliseconds(8)))
       {
         consumer_.onTimeout();
         continue;
