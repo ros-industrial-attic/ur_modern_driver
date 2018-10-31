@@ -122,7 +122,7 @@ The position based controller *should* stay closer to the commanded path, while 
 
 **Note** that the PID values are not optimally tweaked as of this moment.
 
-To use ros_control together with MoveIt, be sure to add the desired controller to the ```controllers.yaml``` in the urXX_moveit_config/config folder. Add one of the following:
+To use ros_control together with MoveIt, be sure to add the desired controller to the ```controllers.yaml``` in the urXX_moveit_config/config folder. Add the following:
 
 ```yaml
 controller_list:
@@ -130,16 +130,6 @@ controller_list:
    action_ns: follow_joint_trajectory
    type: FollowJointTrajectory
    default: true
-   joints:
-      - shoulder_pan_joint
-      - shoulder_lift_joint
-      - elbow_joint
-      - wrist_1_joint
-      - wrist_2_joint
-      - wrist_3_joint
-(OR)
- - name: joint_group_vel_controller
-     type: velocity_controllers/JointGroupVelocityController
    joints:
       - shoulder_pan_joint
       - shoulder_lift_joint
