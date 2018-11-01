@@ -1,4 +1,3 @@
-# Travis CI instructions
 sudo: required
 dist: trusty
 language: generic
