@@ -19,7 +19,7 @@ private:
   ros::NodeHandle nh_;
   ros::Time lastUpdate_;
   controller_manager::ControllerManager controller_;
-  bool state_initialized_;
+  bool robot_state_received_;
 
   // state interfaces
   JointInterface joint_interface_;

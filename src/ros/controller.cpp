@@ -3,7 +3,7 @@
 ROSController::ROSController(URCommander& commander, TrajectoryFollower& follower,
                              std::vector<std::string>& joint_names, double max_vel_change, std::string tcp_link)
   : controller_(this, nh_)
-  , state_initialized_(false)
+  , robot_state_received_(false)
   , joint_interface_(joint_names)
   , wrench_interface_(tcp_link)
   , position_interface_(follower, joint_interface_, joint_names)
@@ -82,11 +82,15 @@ void ROSController::read(RTShared& packet)
 {
   joint_interface_.update(packet);
   wrench_interface_.update(packet);
-  state_initialized_ = true;
+  robot_state_received_ = true;
 }
 
 bool ROSController::update()
 {
+  // don't run controllers if we haven't received robot state yet
+  if (!robot_state_received_)
+    return true;
+
   auto time = ros::Time::now();
   auto diff = time - lastUpdate_;
   lastUpdate_ = time;
@@ -113,8 +117,7 @@ bool ROSController::update()
 
 void ROSController::onTimeout()
 {
-  if (state_initialized_)
-    update();
+  update();
 }
 
 void ROSController::onRobotStateChange(RobotState state)
