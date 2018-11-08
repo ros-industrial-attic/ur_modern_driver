@@ -28,6 +28,7 @@
     <param name="max_velocity" type="double" value="$(arg max_velocity)"/>
     <param name="use_ros_control" type="bool" value="True"/>
     <param name="servoj_gain" type="double" value="750" />
+    <param name="speedj_time" type="double" value="0.008" />
     <param name="prefix" value="$(arg prefix)" />
     <param name="base_frame" type="str" value="$(arg base_frame)"/>
     <param name="tool_frame" type="str" value="$(arg tool_frame)"/>
