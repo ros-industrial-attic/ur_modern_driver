@@ -563,7 +563,6 @@ private:
 	}
 
 	void rosControlLoop() {
-		char buf[256];
 		ros::Duration elapsed_time;
 		struct timespec last_time, current_time;
 		static const double BILLION = 1000000000.0;
@@ -602,77 +601,50 @@ private:
 			// Tool vector: Actual Cartesian coordinates of the tool: (x,y,z,rx,ry,rz), where rx, ry and rz is a rotation vector representation of the tool orientation
 			std::vector<double> tool_vector_actual = robot_.rt_interface_->robot_state_->getToolVectorActual();
 
-			// Check to make sure the tool vector is legit -- sometimes the robot sends bad packets (which have either astronomically large values or all zeros)
-			bool tool_vector_is_zero;
-			if ( std::any_of (tool_vector_actual.begin(), tool_vector_actual.end(), [](int i){return i!=0.0;}) ) {
-				tool_vector_is_zero = false;
-			}
-			else {
-				sprintf(buf, "All of the tool vector values are zero!");
-				print_error(buf);
-				tool_vector_is_zero = true;
-			}
+			// Compute rotation angle
+			double rx = tool_vector_actual[3];
+			double ry = tool_vector_actual[4];
+			double rz = tool_vector_actual[5];
+			double angle = std::sqrt(std::pow(rx,2) + std::pow(ry,2) + std::pow(rz,2));
 
-			bool tool_vector_is_huge;
-			if( std::any_of(tool_vector_actual.begin(), tool_vector_actual.end(), [](int i){return i>1e6;}) ) {
-				sprintf(buf, "At least one of the tool vector values is huge!");
-				print_error(buf);
-				tool_vector_is_huge = true;
-			}
-			else {
-				tool_vector_is_huge = false;
-			}
-
-			if (tool_vector_is_zero or tool_vector_is_huge) {
-				sprintf(buf, "ur_driver received a bad packet: [%f, %f, %f, %f, %f, %f]", tool_vector_actual[0], tool_vector_actual[1], tool_vector_actual[2], tool_vector_actual[3], tool_vector_actual[4], tool_vector_actual[5]);
-				print_error(buf);
-				// TODO what should we do here? restart the driver??
-			}
-			else{
-				// Compute rotation angle
-				double rx = tool_vector_actual[3];
-				double ry = tool_vector_actual[4];
-				double rz = tool_vector_actual[5];
-				double angle = std::sqrt(std::pow(rx,2) + std::pow(ry,2) + std::pow(rz,2));
-
-				// Broadcast transform
-				if( tf_pub.trylock() )
-				{			
-					tf_pub.msg_.transforms[0].header.stamp = ros_time;
-					if (angle < 1e-16) {
-						tf_pub.msg_.transforms[0].transform.rotation.x = 0;
-						tf_pub.msg_.transforms[0].transform.rotation.y = 0;
-						tf_pub.msg_.transforms[0].transform.rotation.z = 0;
-						tf_pub.msg_.transforms[0].transform.rotation.w = 1;
-					} else {
-						tf_pub.msg_.transforms[0].transform.rotation.x = (rx/angle) * std::sin(angle*0.5);
-						tf_pub.msg_.transforms[0].transform.rotation.y = (ry/angle) * std::sin(angle*0.5);
-						tf_pub.msg_.transforms[0].transform.rotation.z = (rz/angle) * std::sin(angle*0.5);
-						tf_pub.msg_.transforms[0].transform.rotation.w = std::cos(angle*0.5);
-					}
-					tf_pub.msg_.transforms[0].transform.translation.x = tool_vector_actual[0];
-					tf_pub.msg_.transforms[0].transform.translation.y = tool_vector_actual[1];
-					tf_pub.msg_.transforms[0].transform.translation.z = tool_vector_actual[2];
-
-					tf_pub.unlockAndPublish();
+			// Broadcast transform
+			if( tf_pub.trylock() )
+			{			
+				tf_pub.msg_.transforms[0].header.stamp = ros_time;
+				if (angle < 1e-16) {
+					tf_pub.msg_.transforms[0].transform.rotation.x = 0;
+					tf_pub.msg_.transforms[0].transform.rotation.y = 0;
+					tf_pub.msg_.transforms[0].transform.rotation.z = 0;
+					tf_pub.msg_.transforms[0].transform.rotation.w = 1;
+				} else {
+					tf_pub.msg_.transforms[0].transform.rotation.x = (rx/angle) * std::sin(angle*0.5);
+					tf_pub.msg_.transforms[0].transform.rotation.y = (ry/angle) * std::sin(angle*0.5);
+					tf_pub.msg_.transforms[0].transform.rotation.z = (rz/angle) * std::sin(angle*0.5);
+					tf_pub.msg_.transforms[0].transform.rotation.w = std::cos(angle*0.5);
 				}
+				tf_pub.msg_.transforms[0].transform.translation.x = tool_vector_actual[0];
+				tf_pub.msg_.transforms[0].transform.translation.y = tool_vector_actual[1];
+				tf_pub.msg_.transforms[0].transform.translation.z = tool_vector_actual[2];
 
-				//Publish tool velocity
-				std::vector<double> tcp_speed = robot_.rt_interface_->robot_state_->getTcpSpeedActual();
-
-				if( tool_vel_pub.trylock() )
-				{			
-					tool_vel_pub.msg_.header.stamp = ros_time;
-					tool_vel_pub.msg_.twist.linear.x = tcp_speed[0];
-					tool_vel_pub.msg_.twist.linear.y = tcp_speed[1];
-					tool_vel_pub.msg_.twist.linear.z = tcp_speed[2];
-					tool_vel_pub.msg_.twist.angular.x = tcp_speed[3];
-					tool_vel_pub.msg_.twist.angular.y = tcp_speed[4];
-					tool_vel_pub.msg_.twist.angular.z = tcp_speed[5];
-
-					tool_vel_pub.unlockAndPublish();
-				}
+				tf_pub.unlockAndPublish();
 			}
+
+			//Publish tool velocity
+			std::vector<double> tcp_speed = robot_.rt_interface_->robot_state_->getTcpSpeedActual();
+
+			if( tool_vel_pub.trylock() )
+			{			
+				tool_vel_pub.msg_.header.stamp = ros_time;
+				tool_vel_pub.msg_.twist.linear.x = tcp_speed[0];
+				tool_vel_pub.msg_.twist.linear.y = tcp_speed[1];
+				tool_vel_pub.msg_.twist.linear.z = tcp_speed[2];
+				tool_vel_pub.msg_.twist.angular.x = tcp_speed[3];
+				tool_vel_pub.msg_.twist.angular.y = tcp_speed[4];
+				tool_vel_pub.msg_.twist.angular.z = tcp_speed[5];
+
+				tool_vel_pub.unlockAndPublish();
+			}
+
 		}
 	}
 

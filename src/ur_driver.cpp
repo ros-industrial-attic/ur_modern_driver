@@ -226,7 +226,8 @@ bool UrDriver::openServo() {
 	struct sockaddr_in cli_addr;
 	socklen_t clilen;
 	clilen = sizeof(cli_addr);
-	new_sockfd_ = accept(incoming_sockfd_, (struct sockaddr *) &cli_addr, &clilen);
+	new_sockfd_ = accept(incoming_sockfd_, (struct sockaddr *) &cli_addr,
+			&clilen);
 	if (new_sockfd_ < 0) {
 		print_fatal("ERROR on accepting reverse communication");
 		return false;
@@ -268,7 +269,8 @@ void UrDriver::halt() {
 	close(incoming_sockfd_);
 }
 
-void UrDriver::setSpeed(double q0, double q1, double q2, double q3, double q4, double q5, double acc) {
+void UrDriver::setSpeed(double q0, double q1, double q2, double q3, double q4,
+		double q5, double acc) {
 	rt_interface_->setSpeed(q0, q1, q2, q3, q4, q5, acc);
 }
 
@@ -288,22 +290,27 @@ void UrDriver::setToolVoltage(unsigned int v) {
 }
 void UrDriver::setFlag(unsigned int n, bool b) {
 	char buf[256];
-	sprintf(buf, "sec setOut():\n\tset_flag(%d, %s)\nend\n", n, b ? "True" : "False");
+	sprintf(buf, "sec setOut():\n\tset_flag(%d, %s)\nend\n", n,
+			b ? "True" : "False");
 	rt_interface_->addCommandToQueue(buf);
 	print_debug(buf);
 }
 void UrDriver::setDigitalOut(unsigned int n, bool b) {
 	char buf[256];
 	if (firmware_version_ < 2) {
-		sprintf(buf, "sec setOut():\n\tset_digital_out(%d, %s)\nend\n", n, b ? "True" : "False");
+		sprintf(buf, "sec setOut():\n\tset_digital_out(%d, %s)\nend\n", n,
+				b ? "True" : "False");
     } else if (n > 15) {
         sprintf(buf,
-                "sec setOut():\n\tset_tool_digital_out(%d, %s)\nend\n", n - 16, b ? "True" : "False");
+                "sec setOut():\n\tset_tool_digital_out(%d, %s)\nend\n",
+                n - 16, b ? "True" : "False");
 	} else if (n > 7) {
-        sprintf(buf, "sec setOut():\n\tset_configurable_digital_out(%d, %s)\nend\n", n - 8, b ? "True" : "False");
+        sprintf(buf, "sec setOut():\n\tset_configurable_digital_out(%d, %s)\nend\n",
+				n - 8, b ? "True" : "False");
 
 	} else {
-		sprintf(buf, "sec setOut():\n\tset_standard_digital_out(%d, %s)\nend\n", n, b ? "True" : "False");
+		sprintf(buf, "sec setOut():\n\tset_standard_digital_out(%d, %s)\nend\n",
+				n, b ? "True" : "False");
 
 	}
 	rt_interface_->addCommandToQueue(buf);
@@ -332,34 +339,6 @@ bool UrDriver::setPayload(double m) {
 	} else
 		return false;
 }
-
-
-
-//-------------------------
-void UrDriver::speedlMove(double xSpeed, double ySpeed, double zSpeed, double xRotation, double yRotation, double zRotation, double linearAcceleration, double duration, double rotationAcceleration){
-	char buf[256];
-	sprintf(buf, "def speedlCmd():\n\tspeedl([%1.7f, %1.7f, %1.7f, %1.6f, %1.6f, %1.6f], %1.7f, %1.6f, %1.6f)\nend\n", xSpeed, ySpeed, zSpeed, xRotation, yRotation, zRotation, linearAcceleration, duration, rotationAcceleration);
-	rt_interface_->addCommandToQueue(buf);
-	print_info(buf);
-
-}
-
-
-void UrDriver::enterFreeDriveMode(){
-	std::string cmd_str;
-		
-	cmd_str = "def freeDrive():\n";
-	cmd_str += "\tfreedrive_mode()\n";
-	cmd_str += "\tkeepalive = 1\n";
-	cmd_str += "\tsleep(1)\n"; //put the robot in freedrive mode for 1 second max. to end sooner request an exit
-	cmd_str += "end\n";
-	
-	rt_interface_->addCommandToQueue(cmd_str);
-	print_debug(cmd_str);
-}
-
-//------------------------
-
 
 void UrDriver::setMinPayload(double m) {
 	if (m > 0) {
