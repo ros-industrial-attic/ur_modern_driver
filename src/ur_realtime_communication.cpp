@@ -50,7 +50,7 @@ bool UrRealtimeCommunication::start() {
 	struct timeval timeout;
 
 	keepalive_ = true;
-	print_info("Realtime port: Connecting...");
+	print_debug("Realtime port: Connecting...");
 
 	connect(sockfd_, (struct sockaddr *) &serv_addr_, sizeof(serv_addr_));
 	FD_ZERO(&writefds);
@@ -135,7 +135,7 @@ void UrRealtimeCommunication::run() {
 	fd_set readfds;
 	FD_ZERO(&readfds);
 	FD_SET(sockfd_, &readfds);
-	print_info("Realtime port: Got connection");
+	print_debug("Realtime port: Got connection");
 	connected_ = true;
 	while (keepalive_) {
 		while (connected_ && keepalive_) {
