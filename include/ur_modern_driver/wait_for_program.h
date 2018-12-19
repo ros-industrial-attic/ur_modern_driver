@@ -1,14 +1,14 @@
 #pragma once
 
 #include "ros/ros.h"
-#include "ur_modern_driver/RobotModeDataMsg.h"
+#include "ur_msgs/RobotModeDataMsg.h"
 // Do not forget to add ur_modern_driver to your CMakeLists.txt
 
 // Note: topic_namespace needs a leading slash.
 bool isProgramRunning(std::string topic_namespace = "")
 {
-  ur_modern_driver::RobotModeDataMsg robot_mode_state;
-  auto msg = ros::topic::waitForMessage<ur_modern_driver::RobotModeDataMsg>(topic_namespace + "/ur_driver/robot_mode_state", ros::Duration(2));
+  ur_msgs::RobotModeDataMsg robot_mode_state;
+  auto msg = ros::topic::waitForMessage<ur_msgs::RobotModeDataMsg>(topic_namespace + "/ur_driver/robot_mode_state", ros::Duration(2));
   if (msg)
     return msg->is_program_running;
   else

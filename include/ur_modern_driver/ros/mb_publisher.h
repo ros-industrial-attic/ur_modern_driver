@@ -7,7 +7,7 @@
 #include <ur_msgs/Digital.h>
 #include <ur_msgs/IOStates.h>
 #include <ur_msgs/MasterboardDataMsg.h>
-#include <ur_modern_driver/RobotModeDataMsg.h>
+#include <ur_msgs/RobotModeDataMsg.h>
 
 #include "ur_modern_driver/ur/consumer.h"
 
@@ -43,7 +43,7 @@ public:
   MBPublisher() : io_pub_(nh_.advertise<ur_msgs::IOStates>("ur_driver/io_states", 1))
                 , status_pub_(nh_.advertise<industrial_msgs::RobotStatus>("ur_driver/robot_status", 1))
                 , masterboard_state_pub_(nh_.advertise<ur_msgs::MasterboardDataMsg>("ur_driver/masterboard_state", 1))
-                , robot_mode_state_pub_(nh_.advertise<ur_modern_driver::RobotModeDataMsg>("ur_driver/robot_mode_state", 1))
+                , robot_mode_state_pub_(nh_.advertise<ur_msgs::RobotModeDataMsg>("ur_driver/robot_mode_state", 1))
   {
   }
 

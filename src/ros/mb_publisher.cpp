@@ -62,7 +62,7 @@ void MBPublisher::publishRobotStatus(industrial_msgs::RobotStatus& status, const
   status_pub_.publish(status);
 
   // --- Publishes the data in robot-specific format.
-  ur_modern_driver::RobotModeDataMsg msg;
+  ur_msgs::RobotModeDataMsg msg;
   msg.timestamp = data.timestamp;
   msg.is_robot_connected = data.physical_robot_connected;
   msg.is_real_robot_enabled = data.real_robot_enabled;
