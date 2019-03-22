@@ -7,7 +7,7 @@
   <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
 
   <arg name="robot_ip"/>
-	<arg name="reverse_port" default="50001"/>
+  <arg name="reverse_port" default="50001"/>
   <arg name="limited" default="false"/>
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="3.0"/>
@@ -49,7 +49,7 @@
   <!-- load other controller -->
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false"
     output="screen" args="load $(arg stopped_controllers)" />
-    
+
   <!-- Convert joint states to /tf tranforms -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 

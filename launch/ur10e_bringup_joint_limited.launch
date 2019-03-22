@@ -10,7 +10,7 @@
 
   <!-- robot_ip: IP-address of the robot's socket-messaging server -->
   <arg name="robot_ip"/>
-	<arg name="reverse_port" default="50001"/>
+  <arg name="reverse_port" default="50001"/>
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="10.0"/>
   <arg name="prefix" default="" />
