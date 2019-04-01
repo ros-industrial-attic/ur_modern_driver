@@ -1,5 +1,25 @@
 # ur_modern_driver
 
+
+## Deprecation notice
+
+**note**: the `master` branch contains a deprecated version of this driver, kept for archival purposes only.
+
+The `master` version of `ur_modern_driver` is **not compatible** with newer controller and Polyscope versions, and should not be used with those.
+
+We recommend anyone using Polyscope versions 3 and newer to use the `kinetic-devel` branch instead.
+
+If building this package from source, the following will checkout the `kinetic-devel` branch:
+
+```bash
+$ git clone -b kinetic-devel https://github.com/ros-industrial/ur_modern_driver.git
+```
+
+`kinetic-devel` will be made the default branch in this repository in the near future.
+
+
+## Overview
+
 A new driver for the UR3/UR5/UR10 robot arms from Universal Robots. It is designed to replace the old driver transparently, while solving some issues, improving usability as well as enabling compatibility  of ros_control. 
 
 ## Improvements
