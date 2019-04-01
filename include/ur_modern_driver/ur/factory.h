@@ -92,7 +92,7 @@ public:
     {
       return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V1_X);
     }
-    else if(major_version_ == 3)
+    else if (major_version_ == 3)
     {
       if (minor_version_ < 3)
         return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_0__1);
@@ -116,7 +116,7 @@ public:
       else
         return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V1_8);
     }
-    else if(major_version_ == 3)
+    else if (major_version_ == 3)
     {
       if (minor_version_ < 2)
         return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_0__1);
