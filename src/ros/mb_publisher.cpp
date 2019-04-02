@@ -39,7 +39,7 @@ void MBPublisher::publish(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data
 void MBPublisher::publishRobotStatus(industrial_msgs::RobotStatus& status, const SharedRobotModeData& data) const
 {
   // note that this is true as soon as the drives are powered,
-  // even if the breaks are still closed
+  // even if the brakes are still closed
   // which is in slight contrast to the comments in the
   // message definition
   status.drives_powered.val = data.robot_power_on;

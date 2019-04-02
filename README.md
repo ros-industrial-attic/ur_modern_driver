@@ -169,10 +169,15 @@ Should be compatible with all robots and control boxes with the newest firmware.
 
 ### Tested with:
 
-*Real UR5 and UR3 with 3.5.1.1.10661 (Dec 13 2017)
-
-*Real UR10 with CB2 running 1.8.14035
-
+* Real UR5 with 3.9.0.46176 (Mar 01 2019)
+* Real UR5 and UR3 with 3.5.1.1.10661 (Dec 13 2017)
+* Real UR10 with CB2 running 1.8.14035
+* Real UR5 with CB2 running 1.8.14035
+* Simulated UR3 running 3.1.18024
+* Simulated UR5 running 3.0.16471
+* Simulated UR5 running 1.8.16941
+* Simulated UR5 running 1.7.10857
+* Simulated UR5 running 1.6.08725
 
 # Credits
 Please cite the following report if using this driver
