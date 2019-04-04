@@ -20,7 +20,6 @@
 
 #include <industrial_msgs/RobotStatus.h>
 #include <ros/ros.h>
-#include <std_msgs/Bool.h>
 #include <ur_msgs/Analog.h>
 #include <ur_msgs/Digital.h>
 #include <ur_msgs/IOStates.h>
