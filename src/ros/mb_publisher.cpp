@@ -34,12 +34,30 @@ void MBPublisher::publish(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data
   appendAnalog(io_msg.analog_out_states, data.analog_output1, 1);
 
   io_pub_.publish(io_msg);
+
+  // --- Publishes the data in robot-specific format.
+  ur_msgs::MasterboardDataMsg msg;
+  msg.digital_input_bits = 0;   // TODO: Set this.
+  msg.digital_output_bits = 0;  // TODO: Set this.
+  msg.analog_input_range0 = data.analog_input_range0;
+  msg.analog_input_range1 = data.analog_input_range1;
+  msg.analog_input0 = data.analog_input0;
+  msg.analog_input1 = data.analog_input1;
+  msg.analog_output_domain0 = data.analog_output_domain0;
+  msg.analog_output_domain1 = data.analog_output_domain1;
+  msg.analog_output0 = data.analog_output0;
+  msg.analog_output1 = data.analog_output1;
+  msg.masterboard_temperature = data.master_board_temperature;
+  msg.robot_voltage_48V = data.robot_voltage_48V;
+  msg.robot_current = data.robot_current;
+  msg.master_io_current = data.master_IO_current;
+  masterboard_state_pub_.publish(msg);
 }
 
 void MBPublisher::publishRobotStatus(industrial_msgs::RobotStatus& status, const SharedRobotModeData& data) const
 {
   // note that this is true as soon as the drives are powered,
-  // even if the breakes are still closed
+  // even if the brakes are still closed
   // which is in slight contrast to the comments in the
   // message definition
   status.drives_powered.val = data.robot_power_on;
@@ -60,6 +78,18 @@ void MBPublisher::publishRobotStatus(industrial_msgs::RobotStatus& status, const
   status.in_error.val = data.protective_stopped;
 
   status_pub_.publish(status);
+
+  // --- Publishes the data in robot-specific format.
+  ur_msgs::RobotModeDataMsg msg;
+  msg.timestamp = data.timestamp;
+  msg.is_robot_connected = data.physical_robot_connected;
+  msg.is_real_robot_enabled = data.real_robot_enabled;
+  msg.is_power_on_robot = data.robot_power_on;
+  msg.is_emergency_stopped = data.emergency_stopped;
+  msg.is_protective_stopped = data.protective_stopped;
+  msg.is_program_running = data.program_running;
+  msg.is_program_paused = data.program_paused;
+  robot_mode_state_pub_.publish(msg);
 }
 
 void MBPublisher::publishRobotStatus(const RobotModeData_V1_X& data) const
