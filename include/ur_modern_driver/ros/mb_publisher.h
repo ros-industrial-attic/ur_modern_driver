@@ -53,9 +53,20 @@ private:
   }
 
   void publish(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data);
+
   void publishRobotStatus(industrial_msgs::RobotStatus& status, const SharedRobotModeData& data) const;
   void publishRobotStatus(const RobotModeData_V1_X& data) const;
   void publishRobotStatus(const RobotModeData_V3_0__1& data) const;
+
+  // publish 1-to-1 copy of MasterBoardData as a ROS message
+  void publishMasterboardData(ur_msgs::MasterboardDataMsg& msg, const SharedMasterBoardData& data) const;
+  void publishMasterboardData(const MasterBoardData_V1_X& data) const;
+  void publishMasterboardData(const MasterBoardData_V3_0__1& data) const;
+
+  // publish 1-to-1 copy of RobotModeData as a ROS message
+  void publishRobotModeData(ur_msgs::RobotModeDataMsg& msg, const SharedRobotModeData& data) const;
+  void publishRobotModeData(const RobotModeData_V1_X& data) const;
+  void publishRobotModeData(const RobotModeData_V3_0__1& data) const;
 
 public:
   MBPublisher()
