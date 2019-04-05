@@ -26,7 +26,7 @@ inline void appendAnalog(std::vector<ur_msgs::Analog>& vec, double val, uint8_t 
   vec.push_back(ana);
 }
 
-void MBPublisher::publish(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data)
+void MBPublisher::publishIOStates(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data)
 {
   appendAnalog(io_msg.analog_in_states, data.analog_input0, 0);
   appendAnalog(io_msg.analog_in_states, data.analog_input1, 1);
@@ -181,7 +181,7 @@ bool MBPublisher::consume(MasterBoardData_V1_X& data)
   ur_msgs::IOStates io_msg;
   appendDigital(io_msg.digital_in_states, data.digital_input_bits);
   appendDigital(io_msg.digital_out_states, data.digital_output_bits);
-  publish(io_msg, data);
+  publishIOStates(io_msg, data);
 
   publishMasterboardData(data);
 
@@ -193,7 +193,7 @@ bool MBPublisher::consume(MasterBoardData_V3_0__1& data)
   ur_msgs::IOStates io_msg;
   appendDigital(io_msg.digital_in_states, data.digital_input_bits);
   appendDigital(io_msg.digital_out_states, data.digital_output_bits);
-  publish(io_msg, data);
+  publishIOStates(io_msg, data);
 
   publishMasterboardData(data);
 

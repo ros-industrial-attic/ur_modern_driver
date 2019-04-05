@@ -51,7 +51,7 @@ private:
     }
   }
 
-  void publish(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data);
+  void publishIOStates(ur_msgs::IOStates& io_msg, SharedMasterBoardData& data);
 
   void publishRobotStatus(industrial_msgs::RobotStatus& status, const SharedRobotModeData& data) const;
   void publishRobotStatus(const RobotModeData_V1_X& data) const;
