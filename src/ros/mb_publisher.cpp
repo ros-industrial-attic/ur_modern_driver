@@ -38,6 +38,12 @@ void MBPublisher::publishIOStates(ur_msgs::IOStates& io_msg, SharedMasterBoardDa
 
 void MBPublisher::publishRobotStatus(industrial_msgs::RobotStatus& status, const SharedRobotModeData& data) const
 {
+  // using ROS time here as the 'timestamp' in RobotModeData is not time-synced
+  // with ROS time. Publishing messages using the controller's time will
+  // complicate correlating RobotStatus messages with other messages that do
+  // use ROS time.
+  status.header.stamp = ros::Time::now();
+
   // note that this is true as soon as the drives are powered,
   // even if the brakes are still closed
   // which is in slight contrast to the comments in the
