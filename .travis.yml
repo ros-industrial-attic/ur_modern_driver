@@ -10,8 +10,6 @@ env:
   global:
     - CCACHE_DIR=$HOME/.ccache
   matrix:
-    - ROS_DISTRO="indigo"  ROS_REPO=ros              NOT_TEST_INSTALL=true
-    - ROS_DISTRO="indigo"  ROS_REPO=ros-shadow-fixed NOT_TEST_INSTALL=true
     - ROS_DISTRO="kinetic" ROS_REPO=ros              NOT_TEST_INSTALL=true
     - ROS_DISTRO="kinetic" ROS_REPO=ros-shadow-fixed NOT_TEST_INSTALL=true
     - ROS_DISTRO="kinetic" ROS_REPO=ros              NOT_TEST_INSTALL=true UPSTREAM_WORKSPACE=file
@@ -19,8 +17,6 @@ env:
     - ROS_DISTRO="kinetic" CLANG_FORMAT_CHECK=file
 matrix:
   allow_failures:
-    - env: ROS_DISTRO="indigo"  ROS_REPO=ros              NOT_TEST_INSTALL=true
-    - env: ROS_DISTRO="indigo"  ROS_REPO=ros-shadow-fixed NOT_TEST_INSTALL=true
     - env: ROS_DISTRO="kinetic" ROS_REPO=ros              NOT_TEST_INSTALL=true
     - env: ROS_DISTRO="kinetic" ROS_REPO=ros-shadow-fixed NOT_TEST_INSTALL=true
 
