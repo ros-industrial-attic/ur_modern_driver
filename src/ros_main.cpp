@@ -44,6 +44,7 @@
 #include "ur_modern_driver/ur/state.h"
 
 static const std::string IP_ADDR_ARG("~robot_ip_address");
+static const std::string REVERSE_IP_ADDR_ARG("~reverse_ip_address");
 static const std::string REVERSE_PORT_ARG("~reverse_port");
 static const std::string ROS_CONTROL_ARG("~use_ros_control");
 static const std::string LOW_BANDWIDTH_TRAJECTORY_FOLLOWER("~use_lowbandwidth_trajectory_follower");
@@ -69,11 +70,12 @@ public:
   std::string base_frame;
   std::string tool_frame;
   std::string tcp_link;
+  std::string reverse_ip_address;
+  int32_t reverse_port;
   std::vector<std::string> joint_names;
   double max_acceleration;
   double max_velocity;
   double max_vel_change;
-  int32_t reverse_port;
   bool use_ros_control;
   bool use_lowbandwidth_trajectory_follower;
   bool shutdown_on_disconnect;
@@ -114,6 +116,7 @@ bool parse_args(ProgArgs &args)
     LOG_ERROR("robot_ip_address parameter must be set!");
     return false;
   }
+  ros::param::param(REVERSE_IP_ADDR_ARG, args.reverse_ip_address, std::string());
   ros::param::param(REVERSE_PORT_ARG, args.reverse_port, int32_t(50001));
   ros::param::param(MAX_VEL_CHANGE_ARG, args.max_vel_change, 15.0);  // rad/s
   ros::param::param(MAX_VEL_CHANGE_ARG, args.max_velocity, 10.0);
@@ -148,7 +151,8 @@ int main(int argc, char **argv)
   std::transform(args.joint_names.begin(), args.joint_names.end(), args.joint_names.begin(),
                  [&args](std::string name) { return args.prefix + name; });
 
-  std::string local_ip(getLocalIPAccessibleFromHost(args.host));
+  std::string local_ip(args.reverse_ip_address.empty() ? getLocalIPAccessibleFromHost(args.host) :
+                                                         args.reverse_ip_address);
 
   URFactory factory(args.host);
   vector<Service *> services;
