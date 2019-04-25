@@ -151,8 +151,12 @@ int main(int argc, char **argv)
   std::transform(args.joint_names.begin(), args.joint_names.end(), args.joint_names.begin(),
                  [&args](std::string name) { return args.prefix + name; });
 
-  std::string local_ip(args.reverse_ip_address.empty() ? getLocalIPAccessibleFromHost(args.host) :
-                                                         args.reverse_ip_address);
+  std::string local_ip(args.reverse_ip_address);
+
+  if (local_ip.empty())
+  {
+    local_ip = getLocalIPAccessibleFromHost(args.host);
+  }
 
   URFactory factory(args.host);
   vector<Service *> services;
