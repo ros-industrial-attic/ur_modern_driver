@@ -153,6 +153,7 @@ int main(int argc, char **argv)
 
   std::string local_ip(args.reverse_ip_address);
 
+  // if no reverse IP address has been configured, try to detect one
   if (local_ip.empty())
   {
     local_ip = getLocalIPAccessibleFromHost(args.host);
