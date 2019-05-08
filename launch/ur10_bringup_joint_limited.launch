@@ -9,7 +9,8 @@
 <launch>
 
   <!-- robot_ip: IP-address of the robot's socket-messaging server -->
-  <arg name="robot_ip"/>
+  <arg name="robot_ip" doc="IP of the controller" />
+  <arg name="reverse_ip" default="" doc="IP of the computer running the driver" />
   <arg name="reverse_port" default="50001"/>
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="10.0"/>
@@ -28,6 +29,7 @@
 
   <include file="$(find ur_modern_driver)/launch/ur10_bringup.launch">
     <arg name="robot_ip" value="$(arg robot_ip)"/>
+    <arg name="reverse_ip" value="$(arg reverse_ip)"/>
     <arg name="reverse_port" value="$(arg reverse_port)"/>
     <arg name="limited"  value="true"/>
     <arg name="min_payload"  value="$(arg min_payload)"/>
