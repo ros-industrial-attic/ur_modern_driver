@@ -88,6 +88,11 @@ public:
     trigger();
     return true;
   }
+  bool consume(RTState_V3_5__5_1& state)
+  {
+    trigger();
+    return true;
+  }
 
   void setupConsumer()
   {
