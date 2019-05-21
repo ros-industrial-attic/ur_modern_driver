@@ -42,6 +42,7 @@ private:
   // state interfaces
   JointInterface joint_interface_;
   WrenchInterface wrench_interface_;
+  ImuInterface imu_interface_;
   // controller interfaces
   PositionInterface position_interface_;
   VelocityInterface velocity_interface_;
@@ -96,6 +97,7 @@ public:
   virtual bool consume(RTState_V3_0__1& state)
   {
     read(state);
+    imu_interface_.update(state);
     return update();
   }
   virtual bool consume(RTState_V3_2__3& state)

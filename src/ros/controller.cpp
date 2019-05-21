@@ -24,11 +24,13 @@ ROSController::ROSController(URCommander& commander, TrajectoryFollower& followe
   , robot_state_received_(false)
   , joint_interface_(joint_names)
   , wrench_interface_(tcp_link)
+  , imu_interface_(tcp_link)
   , position_interface_(follower, joint_interface_, joint_names)
   , velocity_interface_(commander, joint_interface_, joint_names, max_vel_change)
 {
   registerInterface(&joint_interface_);
   registerInterface(&wrench_interface_);
+  registerInterface(&imu_interface_);
   registerControllereInterface(&position_interface_);
   registerControllereInterface(&velocity_interface_);
 }

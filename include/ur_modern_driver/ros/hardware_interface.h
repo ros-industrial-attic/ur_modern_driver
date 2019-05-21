@@ -18,6 +18,7 @@
 
 #pragma once
 #include <controller_manager/controller_manager.h>
+#include <hardware_interface/imu_sensor_interface.h>
 #include <hardware_interface/force_torque_sensor_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
@@ -64,6 +65,22 @@ public:
   WrenchInterface(std::string tcp_link);
   void update(RTShared &packet);
   typedef hardware_interface::ForceTorqueSensorInterface parent_type;
+  static const std::string INTERFACE_NAME;
+};
+
+class ImuInterface : public hardware_interface::ImuSensorInterface
+{
+  std::array<double, 4> orientation_;
+  std::array<double, 9> orientation_covariance_;
+  std::array<double, 3> angular_velocity_;
+  std::array<double, 9> angular_velocity_covariance_;
+  std::array<double, 3> linear_acceleration_;
+  std::array<double, 9> linear_acceleration_covariance_;
+
+public:
+  ImuInterface(std::string tcp_link);
+  void update(RTState_V3_0__1 &packet);
+  typedef hardware_interface::ImuSensorInterface parent_type;
   static const std::string INTERFACE_NAME;
 };
 
