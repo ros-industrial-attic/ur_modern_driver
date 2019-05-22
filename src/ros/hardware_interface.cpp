@@ -70,7 +70,9 @@ void ImuInterface::update(RTState_V3_0__1 &packet)
   }
   else
   {
-    orientation_ = { tv.rotation.x / angle, tv.rotation.y / angle, tv.rotation.z / angle, angle };
+    const auto s = std::sin(0.5 * angle) / angle;
+    const auto c = std::cos(0.5 * angle);
+    orientation_ = { tv.rotation.x * s, tv.rotation.y * s, tv.rotation.z * s, c };
   }
 
   const auto &sa = packet.tcp_speed_actual;
