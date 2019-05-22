@@ -103,6 +103,7 @@ public:
   virtual bool consume(RTState_V3_2__3& state)
   {
     read(state);
+    imu_interface_.update(state);
     return update();
   }
 
