@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#include "ur_modern_driver/log.h"
 #include "ur_modern_driver/ros/hardware_interface.h"
+#include "ur_modern_driver/log.h"
 
 const std::string JointInterface::INTERFACE_NAME = "hardware_interface::JointStateInterface";
 JointInterface::JointInterface(std::vector<std::string> &joint_names)
@@ -48,9 +48,12 @@ void WrenchInterface::update(RTShared &packet)
 
 const std::string ImuInterface::INTERFACE_NAME = "hardware_interface::ImuSensorInterface";
 ImuInterface::ImuInterface(std::string tcp_link)
-  : orientation_{ 0, 0, 0, 1 }, orientation_covariance_{ -1 }
-  , angular_velocity_{ 0, 0, 0 }, angular_velocity_covariance_{ -1 }
-  , linear_acceleration_{ 0, 0, 0 }, linear_acceleration_covariance_{ -1 }
+  : orientation_{ 0, 0, 0, 1 }
+  , orientation_covariance_{ -1 }
+  , angular_velocity_{ 0, 0, 0 }
+  , angular_velocity_covariance_{ -1 }
+  , linear_acceleration_{ 0, 0, 0 }
+  , linear_acceleration_covariance_{ -1 }
 {
   registerHandle(hardware_interface::ImuSensorHandle(
       { "imu", tcp_link, orientation_.begin(), orientation_covariance_.begin(), angular_velocity_.begin(),

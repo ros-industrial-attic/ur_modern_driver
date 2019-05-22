@@ -18,8 +18,8 @@
 
 #pragma once
 #include <controller_manager/controller_manager.h>
-#include <hardware_interface/imu_sensor_interface.h>
 #include <hardware_interface/force_torque_sensor_interface.h>
+#include <hardware_interface/imu_sensor_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <algorithm>
