@@ -2,6 +2,9 @@
 [![Build Status](https://travis-ci.org/ros-industrial/ur_modern_driver.svg?branch=kinetic-devel)](https://travis-ci.org/ros-industrial/ur_modern_driver)
 [![license - apache 2.0](https://img.shields.io/:license-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
+
+[![support level: community](https://img.shields.io/badge/support%20level-community-lightgray.png)](http://rosindustrial.org/news/2016/10/7/better-supporting-a-growing-ros-industrial-software-platform)
+
 A new driver for the UR3/UR5/UR10 robot arms from Universal Robots. It is designed to replace the old driver transparently, while solving some issues, improving usability as well as enabling compatibility  of ros_control.
 
 ## Improvements
