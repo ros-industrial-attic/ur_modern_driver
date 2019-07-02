@@ -81,7 +81,11 @@ executor more "tolerant" to execution delays. There is also another parameter:
 
 **As the driver communicates with the robot via ethernet and depends on reliable continous communication, it is not possible to reliably control a UR from a virtual machine.**
 
-Just clone the repository into your catkin working directory and make it with ```catkin_make```.
+If building this package from source, you can clone this repository into the source space of your Catkin workspace using the following command:
+
+```bash
+$ git clone -b kinetic-devel https://github.com/ros-industrial/ur_modern_driver.git
+```
 
 Note that this package depends on ur_msgs, hardware_interface, and controller_manager so it cannot directly be used with ROS versions prior to hydro.
 
