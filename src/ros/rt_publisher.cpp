@@ -98,6 +98,9 @@ bool RTPublisher::publishTemperature(RTShared& packet, Time& t)
   {
     sensor_msgs::Temperature msg;
     msg.header.stamp = t;
+    // assumption: origins of the link frames are coincident with the origins
+    // of the joints. As the temperature sensors are assumed to be located in
+    // the joints, using the names of the link frames here should be acceptable.
     msg.header.frame_id = link_names_[i];
     msg.temperature = packet.motor_temperatures[i];
 
