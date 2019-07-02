@@ -38,6 +38,7 @@ private:
   ros::Time lastUpdate_;
   controller_manager::ControllerManager controller_;
   bool robot_state_received_;
+  ros::Time most_recent_packet_time_;
 
   // state interfaces
   JointInterface joint_interface_;

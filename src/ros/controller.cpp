@@ -101,17 +101,26 @@ void ROSController::read(RTShared& packet)
   joint_interface_.update(packet);
   wrench_interface_.update(packet);
   robot_state_received_ = true;
+  most_recent_packet_time_ = ros::Time::now();
 }
 
 bool ROSController::update()
 {
   // don't run controllers if we haven't received robot state yet
   if (!robot_state_received_)
+  {
+    ROS_INFO_THROTTLE(1.0, "No messages received from the robot so far.");
     return true;
+  }
 
   auto time = ros::Time::now();
   auto diff = time - lastUpdate_;
   lastUpdate_ = time;
+
+  if ((time - most_recent_packet_time_).toSec() > 0.01)  // CB2 and 3 cycle times are 0.008, adding some margin
+  {
+    ROS_WARN_THROTTLE(1.0, "No new packets received from robot. Connection is probably lost");
+  }
 
   controller_.update(time, diff, !service_enabled_);
 
