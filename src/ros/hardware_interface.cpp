@@ -36,9 +36,11 @@ void JointInterface::update(RTShared &packet)
 }
 
 const std::string WrenchInterface::INTERFACE_NAME = "hardware_interface::ForceTorqueSensorInterface";
-WrenchInterface::WrenchInterface(std::string tcp_link)
+WrenchInterface::WrenchInterface(std::string wrench_frame)
 {
-  registerHandle(hardware_interface::ForceTorqueSensorHandle("wrench", tcp_link, tcp_.begin(), tcp_.begin() + 3));
+  // the frame_id for the Wrench is set to what is configured as the "base frame".
+  // Refer to ros-industrial/ur_modern_driver#318 for the rationale.
+  registerHandle(hardware_interface::ForceTorqueSensorHandle("wrench", wrench_frame, tcp_.begin(), tcp_.begin() + 3));
 }
 
 void WrenchInterface::update(RTShared &packet)

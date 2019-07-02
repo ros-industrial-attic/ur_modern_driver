@@ -19,11 +19,11 @@
 #include "ur_modern_driver/ros/controller.h"
 
 ROSController::ROSController(URCommander& commander, TrajectoryFollower& follower,
-                             std::vector<std::string>& joint_names, double max_vel_change, std::string tcp_link)
+                             std::vector<std::string>& joint_names, double max_vel_change, std::string wrench_frame)
   : controller_(this, nh_)
   , robot_state_received_(false)
   , joint_interface_(joint_names)
-  , wrench_interface_(tcp_link)
+  , wrench_interface_(wrench_frame)
   , position_interface_(follower, joint_interface_, joint_names)
   , velocity_interface_(commander, joint_interface_, joint_names, max_vel_change)
 {
