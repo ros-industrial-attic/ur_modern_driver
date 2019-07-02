@@ -36,6 +36,9 @@ using namespace tf;
 
 const std::string JOINTS[] = { "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint",
                                "wrist_1_joint",      "wrist_2_joint",       "wrist_3_joint" };
+// links with origin in the joints configured above.
+const std::string LINKS[] = { "shoulder_link", "upper_arm_link", "forearm_link",
+                              "wrist_1_link",  "wrist_2_link",   "wrist_3_link" };
 
 class RTPublisher : public URRTPacketConsumer
 {
@@ -47,6 +50,7 @@ private:
   Publisher joint_temperature_pub_;
   TransformBroadcaster transform_broadcaster_;
   std::vector<std::string> joint_names_;
+  std::vector<std::string> link_names_;
   std::string base_frame_;
   std::string tool_frame_;
   bool temp_only_;
@@ -72,6 +76,10 @@ public:
     for (auto const& j : JOINTS)
     {
       joint_names_.push_back(joint_prefix + j);
+    }
+    for (auto const& link : LINKS)
+    {
+      link_names_.push_back(joint_prefix + link);
     }
   }
 

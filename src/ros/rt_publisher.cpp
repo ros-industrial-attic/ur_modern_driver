@@ -98,7 +98,7 @@ bool RTPublisher::publishTemperature(RTShared& packet, Time& t)
   {
     sensor_msgs::Temperature msg;
     msg.header.stamp = t;
-    msg.header.frame_id = joint_names_[i];
+    msg.header.frame_id = link_names_[i];
     msg.temperature = packet.motor_temperatures[i];
 
     joint_temperature_pub_.publish(msg);
