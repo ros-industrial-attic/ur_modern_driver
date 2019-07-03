@@ -31,6 +31,10 @@
 #include "ur_modern_driver/ur/consumer.h"
 #include "ur_modern_driver/ur/rt_state.h"
 
+// If no packet is received for this time, a warning is issued to the user
+// CB2 and 3 cycle times are 0.008, adding some margin
+static const double PACKET_RECEIVE_WARN_TIME = 0.01;
+
 class ROSController : private hardware_interface::RobotHW, public URRTPacketConsumer, public Service
 {
 private:

@@ -117,7 +117,7 @@ bool ROSController::update()
   auto diff = time - lastUpdate_;
   lastUpdate_ = time;
 
-  if ((time - most_recent_packet_time_).toSec() > 0.01)  // CB2 and 3 cycle times are 0.008, adding some margin
+  if ((time - most_recent_packet_time_).toSec() > PACKET_RECEIVE_WARN_TIME)
   {
     ROS_WARN_THROTTLE(1.0, "No new packets received from robot. Connection is probably lost");
   }
