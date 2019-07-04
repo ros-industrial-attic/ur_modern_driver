@@ -61,7 +61,7 @@ class WrenchInterface : public hardware_interface::ForceTorqueSensorInterface
   std::array<double, 6> tcp_;
 
 public:
-  WrenchInterface(std::string tcp_link);
+  WrenchInterface(std::string wrench_frame);
   void update(RTShared &packet);
   typedef hardware_interface::ForceTorqueSensorInterface parent_type;
   static const std::string INTERFACE_NAME;

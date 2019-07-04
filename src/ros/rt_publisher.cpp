@@ -37,6 +37,9 @@ bool RTPublisher::publishWrench(RTShared& packet, Time& t)
 {
   geometry_msgs::WrenchStamped wrench_msg;
   wrench_msg.header.stamp = t;
+  // Setting this to what is configured as the "base frame" through ROS parameters.
+  // Refer to ros-industrial/ur_modern_driver#318 for the rationale.
+  wrench_msg.header.frame_id = base_frame_;
   wrench_msg.wrench.force.x = packet.tcp_force[0];
   wrench_msg.wrench.force.y = packet.tcp_force[1];
   wrench_msg.wrench.force.z = packet.tcp_force[2];
