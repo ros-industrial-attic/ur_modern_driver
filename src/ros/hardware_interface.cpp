@@ -51,7 +51,7 @@ void WrenchInterface::update(RTShared &packet)
 const std::string VelocityInterface::INTERFACE_NAME = "hardware_interface::VelocityJointInterface";
 VelocityInterface::VelocityInterface(URCommander &commander, hardware_interface::JointStateInterface &js_interface,
                                      std::vector<std::string> &joint_names, double max_vel_change)
-  : commander_(commander), max_vel_change_(max_vel_change), prev_velocity_cmd_({ 0, 0, 0, 0, 0, 0 })
+  : commander_(commander), prev_velocity_cmd_({ 0, 0, 0, 0, 0, 0 }), max_vel_change_(max_vel_change)
 {
   for (size_t i = 0; i < 6; i++)
   {
