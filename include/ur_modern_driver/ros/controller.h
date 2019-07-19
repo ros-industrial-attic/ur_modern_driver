@@ -108,6 +108,11 @@ public:
     read(state);
     return update();
   }
+  virtual bool consume(RTState_V3_10__5_4& state)
+  {
+    read(state);
+    return update();
+  }
 
   virtual void onTimeout();
 

@@ -38,6 +38,7 @@ public:
   virtual bool consume(RTState_V3_0__1& state) = 0;
   virtual bool consume(RTState_V3_2__3& state) = 0;
   virtual bool consume(RTState_V3_5__5_1& state) = 0;
+  virtual bool consume(RTState_V3_10__5_4& state) = 0;
 };
 
 class URStatePacketConsumer : public IConsumer<StatePacket>

@@ -103,6 +103,10 @@ bool ActionServer::consume(RTState_V3_5__5_1& state)
 {
   return updateState(state);
 }
+bool ActionServer::consume(RTState_V3_10__5_4& state)
+{
+  return updateState(state);
+}
 
 void ActionServer::onGoal(GoalHandle gh)
 {

@@ -130,6 +130,18 @@ bool RTState_V3_5__5_1::parseWith(BinParser& bp)
   return true;
 }
 
+bool RTState_V3_10__5_4::parseWith(BinParser& bp)
+{
+  if (!bp.checkSize<RTState_V3_10__5_4>())
+    return false;
+
+  RTState_V3_5__5_1::parseWith(bp);
+
+  bp.parse(safety_status);
+
+  return true;
+}
+
 bool RTState_V1_6__7::consumeWith(URRTPacketConsumer& consumer)
 {
   return consumer.consume(*this);
@@ -147,6 +159,10 @@ bool RTState_V3_2__3::consumeWith(URRTPacketConsumer& consumer)
   return consumer.consume(*this);
 }
 bool RTState_V3_5__5_1::consumeWith(URRTPacketConsumer& consumer)
+{
+  return consumer.consume(*this);
+}
+bool RTState_V3_10__5_4::consumeWith(URRTPacketConsumer& consumer)
 {
   return consumer.consume(*this);
 }

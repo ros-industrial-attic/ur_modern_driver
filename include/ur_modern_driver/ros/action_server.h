@@ -91,4 +91,5 @@ public:
   virtual bool consume(RTState_V3_0__1& state);
   virtual bool consume(RTState_V3_2__3& state);
   virtual bool consume(RTState_V3_5__5_1& state);
+  virtual bool consume(RTState_V3_10__5_4& state);
 };

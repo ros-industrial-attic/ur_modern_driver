@@ -108,3 +108,14 @@ public:
 
   static const size_t SIZE = MasterBoardData_V3_0__1::SIZE + sizeof(uint8_t) * 2;
 };
+
+class MasterBoardData_V3_10 : public MasterBoardData_V3_2
+{
+public:
+  virtual bool parseWith(BinParser& bp);
+  virtual bool consumeWith(URStatePacketConsumer& consumer);
+
+  uint8_t unknown_internal_use;
+
+  static const size_t SIZE = MasterBoardData_V3_2::SIZE + sizeof(uint8_t);
+};
