@@ -100,4 +100,4 @@ typedef URStateParser<RobotModeData_V1_X, MasterBoardData_V1_X> URStateParser_V1
 typedef URStateParser<RobotModeData_V3_0__1, MasterBoardData_V3_0__1> URStateParser_V3_0__1;
 typedef URStateParser<RobotModeData_V3_2, MasterBoardData_V3_2> URStateParser_V3_2;
 typedef URStateParser<RobotModeData_V3_5, MasterBoardData_V3_2> URStateParser_V3_5;
-typedef URStateParser<RobotModeData_V3_5, MasterBoardData_V3_10> URStateParser_V3_10;
+typedef URStateParser<RobotModeData_V3_5, MasterBoardData_V3_10__5_4> URStateParser_V3_10__5_4;

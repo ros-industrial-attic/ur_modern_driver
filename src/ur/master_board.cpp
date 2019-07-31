@@ -89,7 +89,7 @@ bool MasterBoardData_V3_2::parseWith(BinParser& bp)
   return true;
 }
 
-bool MasterBoardData_V3_10::parseWith(BinParser& bp)
+bool MasterBoardData_V3_10__5_4::parseWith(BinParser& bp)
 {
   if (!bp.checkSize<MasterBoardData_V3_2>())
     return false;
@@ -112,7 +112,7 @@ bool MasterBoardData_V3_2::consumeWith(URStatePacketConsumer& consumer)
 {
   return consumer.consume(*this);
 }
-bool MasterBoardData_V3_10::consumeWith(URStatePacketConsumer& consumer)
+bool MasterBoardData_V3_10__5_4::consumeWith(URStatePacketConsumer& consumer)
 {
   return consumer.consume(*this);
 }

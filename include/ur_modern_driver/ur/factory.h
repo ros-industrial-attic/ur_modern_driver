@@ -108,7 +108,7 @@ public:
       else if (minor_version_ <10)
         return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_5);
       else if (minor_version_ <11)
-        return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_10);
+        return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_10__5_4);
       else
       {
         LOG_FATAL("UR software version %u.%u not yet supported", major_version_, minor_version_);
@@ -120,7 +120,7 @@ public:
       if (minor_version_ < 4)
         return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_5);
       else if (minor_version_ < 5)
-        return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_10);
+        return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_10__5_4);
     }
     else
     {
@@ -161,7 +161,6 @@ public:
       else if (minor_version_ < 5)
       {
         return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_10__5_4);
-        ROS_INFO("URRTStateParser_V3_10__5_4 used");
       }
       else
       {
