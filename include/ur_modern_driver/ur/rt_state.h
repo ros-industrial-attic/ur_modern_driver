@@ -131,3 +131,16 @@ public:
 
   static_assert(RTState_V3_5__5_1::SIZE == 984, "RTState_V3_5__5_1 has mismatched size!");
 };
+
+class RTState_V3_10__5_4 : public RTState_V3_5__5_1
+{
+public:
+  bool parseWith(BinParser& bp);
+  virtual bool consumeWith(URRTPacketConsumer& consumer);
+
+  double safety_status;
+
+  static const size_t SIZE = RTState_V3_5__5_1::SIZE + sizeof(double);
+
+  static_assert(RTState_V3_10__5_4::SIZE == 992, "RTState_V3_10__5_4 has mismatched size!");
+};

@@ -73,17 +73,24 @@ public:
 
   bool isVersion3()
   {
-    return major_version_ == 3;
+      return major_version_ ==3;
   }
 
   std::unique_ptr<URCommander> getCommander(URStream& stream)
   {
     if (major_version_ == 1)
       return std::unique_ptr<URCommander>(new URCommander_V1_X(stream));
-    else if (minor_version_ < 3)
-      return std::unique_ptr<URCommander>(new URCommander_V3_1__2(stream));
-    else
+    else if (major_version_ == 3)
+    {
+      if (minor_version_ < 3)
+        return std::unique_ptr<URCommander>(new URCommander_V3_1__2(stream));
+      else
+        return std::unique_ptr<URCommander>(new URCommander_V3_3(stream));
+    }
+    else if (major_version_ == 5)
+    {
       return std::unique_ptr<URCommander>(new URCommander_V3_3(stream));
+    }
   }
 
   std::unique_ptr<URParser<StatePacket>> getStateParser()
@@ -98,12 +105,27 @@ public:
         return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_0__1);
       else if (minor_version_ < 5)
         return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_2);
-      else
+      else if (minor_version_ <10)
         return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_5);
+      else if (minor_version_ <11)
+        return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_10);
+      else
+      {
+        LOG_FATAL("UR software version %u.%u not yet supported", major_version_, minor_version_);
+        std::exit(EXIT_FAILURE);
+      }
+    }
+    else if (major_version_ == 5)
+    {
+      if (minor_version_ < 4)
+        return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_5);
+      else if (minor_version_ < 5)
+        return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_10);
     }
     else
     {
-      return std::unique_ptr<URParser<StatePacket>>(new URStateParser_V3_5);
+      LOG_FATAL("UR software version %u.%u not yet supported", major_version_, minor_version_);
+      std::exit(EXIT_FAILURE);
     }
   }
 
@@ -122,12 +144,35 @@ public:
         return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_0__1);
       else if (minor_version_ < 5)
         return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_2__3);
-      else
+      else if (minor_version_ <10)
         return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_5__5_1);
+      else if (minor_version_ <11)
+        return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_10__5_4);
+      else
+      {
+        LOG_FATAL("UR software version %u.%u not yet supported", major_version_, minor_version_);
+        std::exit(EXIT_FAILURE);
+      }
+    }
+    else if (major_version_ == 5)
+    {
+      if (minor_version_ < 4)
+        return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_5__5_1);
+      else if (minor_version_ < 5)
+      {
+        return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_10__5_4);
+        ROS_INFO("URRTStateParser_V3_10__5_4 used");
+      }
+      else
+      {
+        LOG_FATAL("UR software version %u.%u not yet supported", major_version_, minor_version_);
+        std::exit(EXIT_FAILURE);
+      }
     }
     else
     {
-      return std::unique_ptr<URParser<RTPacket>>(new URRTStateParser_V3_5__5_1);
+      LOG_FATAL("UR software version %u.%u not yet supported", major_version_, minor_version_);
+      std::exit(EXIT_FAILURE);
     }
-  }
+   }
 };

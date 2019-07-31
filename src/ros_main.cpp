@@ -117,7 +117,6 @@ std::string getLocalIPAccessibleFromHost(std::string &host)
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "ur_driver");
-
   ProgArgs args;
   if (!parse_args(args))
   {
@@ -201,6 +200,8 @@ int main(int argc, char **argv)
   MultiConsumer<StatePacket> state_cons(state_vec);
   Pipeline<StatePacket> state_pl(state_prod, state_cons, "StatePacket", *notifier);
 
+  ros::Duration duration(3.0);
+  duration.sleep();
   LOG_INFO("Starting main loop");
 
   rt_pl.run();

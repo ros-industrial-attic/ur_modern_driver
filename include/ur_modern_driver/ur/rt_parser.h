@@ -37,3 +37,4 @@ typedef URRTStateParser<RTState_V1_8> URRTStateParser_V1_8;
 typedef URRTStateParser<RTState_V3_0__1> URRTStateParser_V3_0__1;
 typedef URRTStateParser<RTState_V3_2__3> URRTStateParser_V3_2__3;
 typedef URRTStateParser<RTState_V3_5__5_1> URRTStateParser_V3_5__5_1;
+typedef URRTStateParser<RTState_V3_10__5_4> URRTStateParser_V3_10__5_4;

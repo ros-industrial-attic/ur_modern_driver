@@ -49,7 +49,7 @@ public:
 
   static const size_t SIZE = SharedRobotModeData::SIZE + sizeof(uint8_t) + sizeof(robot_mode_V1_X) + sizeof(double);
 
-  static_assert(RobotModeData_V1_X::SIZE == 24, "RobotModeData_V1_X has missmatched size");
+  static_assert(RobotModeData_V1_X::SIZE == 24, "RobotModeData_V1_X has mismatched size");
 };
 
 enum class robot_mode_V3_X : uint8_t
@@ -88,7 +88,7 @@ public:
   static const size_t SIZE = SharedRobotModeData::SIZE + sizeof(uint8_t) + sizeof(robot_mode_V3_X) +
                              sizeof(robot_control_mode_V3_X) + sizeof(double) + sizeof(double);
 
-  static_assert(RobotModeData_V3_0__1::SIZE == 33, "RobotModeData_V3_0__1 has missmatched size");
+  static_assert(RobotModeData_V3_0__1::SIZE == 33, "RobotModeData_V3_0__1 has mismatched size");
 };
 
 class RobotModeData_V3_2 : public RobotModeData_V3_0__1
@@ -101,7 +101,7 @@ public:
 
   static const size_t SIZE = RobotModeData_V3_0__1::SIZE + sizeof(double);
 
-  static_assert(RobotModeData_V3_2::SIZE == 41, "RobotModeData_V3_2 has missmatched size");
+  static_assert(RobotModeData_V3_2::SIZE == 41, "RobotModeData_V3_2 has mismatched size");
 };
 
 class RobotModeData_V3_5 : public RobotModeData_V3_2
@@ -114,5 +114,6 @@ public:
 
   static const size_t SIZE = RobotModeData_V3_2::SIZE + sizeof(unsigned char);
 
-  static_assert(RobotModeData_V3_5::SIZE == 42, "RobotModeData_V3_5 has missmatched size");
+  static_assert(RobotModeData_V3_5::SIZE == 42, "RobotModeData_V3_5 has mismatched size");
 };
+

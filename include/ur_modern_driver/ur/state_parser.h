@@ -32,10 +32,11 @@ public:
     message_type type;
     bp.parse(packet_size);
     bp.parse(type);
-
+    LOG_WARN("Received message type: %u", static_cast<uint8_t>(type));
     if (type != message_type::ROBOT_STATE)
     {
       // quietly ignore the intial version message
+
       if (type != message_type::ROBOT_MESSAGE)
       {
         LOG_WARN("Invalid state message type recieved: %u", static_cast<uint8_t>(type));
@@ -53,6 +54,8 @@ public:
         return false;
       }
       uint32_t sub_size = bp.peek<uint32_t>();
+      LOG_INFO("Received package of size %" PRIu32, sub_size);
+
       if (!bp.checkSize(static_cast<size_t>(sub_size)))
       {
         LOG_WARN("Invalid sub-package size of %" PRIu32 " received!", sub_size);
@@ -97,3 +100,4 @@ typedef URStateParser<RobotModeData_V1_X, MasterBoardData_V1_X> URStateParser_V1
 typedef URStateParser<RobotModeData_V3_0__1, MasterBoardData_V3_0__1> URStateParser_V3_0__1;
 typedef URStateParser<RobotModeData_V3_2, MasterBoardData_V3_2> URStateParser_V3_2;
 typedef URStateParser<RobotModeData_V3_5, MasterBoardData_V3_2> URStateParser_V3_5;
+typedef URStateParser<RobotModeData_V3_5, MasterBoardData_V3_10> URStateParser_V3_10;
