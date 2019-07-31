@@ -91,6 +91,11 @@ If you would like to run this package to connect to the hardware, you only need 
 ```
 roslaunch ur_modern_driver urXX_bringup.launch robot_ip:=ROBOT_IP_ADDRESS
 ```
+For e-series, enable URCaps Remote Control in System Settings. Once enabled, turn on Remote Control in the Profile menu. 
+Run the launch file: 
+```
+roslaunch ur_modern_driver urXXe_bringup.launch robot_ip:=ROBOT_IP_ADDRESS
+```
 
 Where ROBOT_IP_ADDRESS is your UR arm's IP and XX is '5' or '10' depending on your robot. The above launch file makes calls to both roscore and the launch file to the urXX_description so that ROS's parameter server has information on your robot arm. If you do not have your ```ur_description``` installed please do so via:
 ```
@@ -98,10 +103,17 @@ sudo apt install ros-<distro>-ur-description
 ```
 
 Where <distro> is the ROS distribution your machine is running on. You may want to run MoveIt to plan and execute actions on the arm. You can do so by simply entering the following commands after launching ```ur_modern_driver```:
+ 
 ```
 roslaunch urXX_moveit_config ur5_moveit_planning_execution.launch
 roslaunch urXX_moveit_config moveit_rviz.launch config:=true
 ```
+ 
+ For e-series: 
+ ```
+ roslaunch urXX_e_moveit_config urXX_e_moveit_planning_execution.launch
+ roslaunch urXX_e_moveit_config moveit_rviz.launch config:=true
+ ```
 ---
 If you would like to use the ros\_control-based approach, use the launch files urXX\_ros\_control.launch, where XX is '5' or '10' depending on your robot.
 
