@@ -73,7 +73,7 @@ public:
 
   bool isVersion3()
   {
-    return major_version_ == 3;
+    return major_version_ >= 3;
   }
 
   std::unique_ptr<URCommander> getCommander(URStream& stream)

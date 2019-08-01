@@ -152,6 +152,12 @@ controller_list:
       - wrist_3_joint
 ```
 
+### Troubleshooting
+
+If robot is overshooting the goal state, try setting ```use_lowbandwidth_trajectory_follower``` = TRUE in launch file.
+
+If robot is planning excessive joint movements, try using ```urXX_bringup_joint_limited.launch``` or ```urXXe_bringup_joint_limited.launch``` instead when launching driver.
+
 ## Using the tool0_controller frame
 
 Each robot from UR is calibrated individually, so there is a small error (in the order of millimeters) between the end-effector reported by the URDF models in https://github.com/ros-industrial/universal_robot/tree/indigo-devel/ur_description and
@@ -180,6 +186,7 @@ Should be compatible with all robots and control boxes with the newest firmware.
 
 ### Tested with:
 
+* Real UR10e running 5.4.2.76197
 * Real UR10 with CB2 running 1.8.14035
 * Real UR5 with CB2 running 1.8.14035
 * Simulated UR3 running 3.1.18024

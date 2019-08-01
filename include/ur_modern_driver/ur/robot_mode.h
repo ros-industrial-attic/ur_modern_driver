@@ -116,4 +116,3 @@ public:
 
   static_assert(RobotModeData_V3_5::SIZE == 42, "RobotModeData_V3_5 has mismatched size");
 };
-
