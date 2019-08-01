@@ -112,9 +112,9 @@ bool RTState_V3_5__5_1::parseWith(BinParser& bp)
   return true;
 }
 
-bool RTState_V3_10__5_4::parseWith(BinParser&bp)
+bool RTState_V3_10__5_4::parseWith(BinParser& bp)
 {
-  if(!bp.checkSize<RTState_V3_10__5_4>())
+  if (!bp.checkSize<RTState_V3_10__5_4>())
     return false;
 
   RTState_V3_5__5_1::parseWith(bp);

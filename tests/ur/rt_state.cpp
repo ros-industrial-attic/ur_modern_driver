@@ -256,7 +256,7 @@ TEST(RTState_V3_10__5_4, testRandomDataParsing)
   ASSERT_EQ(rdt.getNext<double3_t>(), state.elbow_position);
   ASSERT_EQ(rdt.getNext<double3_t>(), state.elbow_velocity);
 
-  ASSERT_EQ(rdt.getNext<double>(),state.safety_status);
+  ASSERT_EQ(rdt.getNext<double>(), state.safety_status);
 
   EXPECT_TRUE(bp.empty()) << "did not consume all data";
 }
