@@ -1,3 +1,23 @@
+/*
+ * Copyright 2017, 2018 Jarek Potiuk (low bandwidth trajectory follower)
+ *
+ * Copyright 2017, 2018 Simon Rasmussen (refactor)
+ *
+ * Copyright 2015, 2016 Thomas Timm Andersen (original version)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <ros/ros.h>
 #include <chrono>
 #include <cstdlib>
@@ -24,6 +44,7 @@
 #include "ur_modern_driver/ur/state.h"
 
 static const std::string IP_ADDR_ARG("~robot_ip_address");
+static const std::string REVERSE_IP_ADDR_ARG("~reverse_ip_address");
 static const std::string REVERSE_PORT_ARG("~reverse_port");
 static const std::string ROS_CONTROL_ARG("~use_ros_control");
 static const std::string LOW_BANDWIDTH_TRAJECTORY_FOLLOWER("~use_lowbandwidth_trajectory_follower");
@@ -49,11 +70,12 @@ public:
   std::string base_frame;
   std::string tool_frame;
   std::string tcp_link;
+  std::string reverse_ip_address;
+  int32_t reverse_port;
   std::vector<std::string> joint_names;
   double max_acceleration;
   double max_velocity;
   double max_vel_change;
-  int32_t reverse_port;
   bool use_ros_control;
   bool use_lowbandwidth_trajectory_follower;
   bool shutdown_on_disconnect;
@@ -94,6 +116,7 @@ bool parse_args(ProgArgs &args)
     LOG_ERROR("robot_ip_address parameter must be set!");
     return false;
   }
+  ros::param::param(REVERSE_IP_ADDR_ARG, args.reverse_ip_address, std::string());
   ros::param::param(REVERSE_PORT_ARG, args.reverse_port, int32_t(50001));
   ros::param::param(MAX_VEL_CHANGE_ARG, args.max_vel_change, 15.0);  // rad/s
   ros::param::param(MAX_VEL_CHANGE_ARG, args.max_velocity, 10.0);
@@ -127,7 +150,13 @@ int main(int argc, char **argv)
   std::transform(args.joint_names.begin(), args.joint_names.end(), args.joint_names.begin(),
                  [&args](std::string name) { return args.prefix + name; });
 
-  std::string local_ip(getLocalIPAccessibleFromHost(args.host));
+  std::string local_ip(args.reverse_ip_address);
+
+  // if no reverse IP address has been configured, try to detect one
+  if (local_ip.empty())
+  {
+    local_ip = getLocalIPAccessibleFromHost(args.host);
+  }
 
   URFactory factory(args.host);
   vector<Service *> services;
@@ -148,7 +177,8 @@ int main(int argc, char **argv)
     LOG_INFO("ROS control enabled");
     TrajectoryFollower *traj_follower =
         new TrajectoryFollower(*rt_commander, local_ip, args.reverse_port, factory.isVersion3());
-    controller = new ROSController(*rt_commander, *traj_follower, args.joint_names, args.max_vel_change, args.tcp_link);
+    controller =
+        new ROSController(*rt_commander, *traj_follower, args.joint_names, args.max_vel_change, args.base_frame);
     rt_vec.push_back(controller);
     services.push_back(controller);
   }

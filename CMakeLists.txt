@@ -24,7 +24,6 @@ find_package(catkin REQUIRED
     ur_msgs
 )
 
-
 catkin_package(
   INCLUDE_DIRS
     include

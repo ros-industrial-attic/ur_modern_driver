@@ -1,11 +1,29 @@
+/*
+ * Copyright 2017, 2018 Simon Rasmussen (refactor)
+ *
+ * Copyright 2015, 2016 Thomas Timm Andersen (original version)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "ur_modern_driver/ros/controller.h"
 
 ROSController::ROSController(URCommander& commander, TrajectoryFollower& follower,
-                             std::vector<std::string>& joint_names, double max_vel_change, std::string tcp_link)
+                             std::vector<std::string>& joint_names, double max_vel_change, std::string wrench_frame)
   : controller_(this, nh_)
   , robot_state_received_(false)
   , joint_interface_(joint_names)
-  , wrench_interface_(tcp_link)
+  , wrench_interface_(wrench_frame)
   , position_interface_(follower, joint_interface_, joint_names)
   , velocity_interface_(commander, joint_interface_, joint_names, max_vel_change)
 {

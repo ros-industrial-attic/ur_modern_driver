@@ -1,3 +1,21 @@
+/*
+ * Copyright 2017, 2018 Simon Rasmussen (refactor)
+ *
+ * Copyright 2015, 2016 Thomas Timm Andersen (original version)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #pragma once
 
 #include <geometry_msgs/PoseStamped.h>
@@ -18,6 +36,9 @@ using namespace tf;
 
 const std::string JOINTS[] = { "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint",
                                "wrist_1_joint",      "wrist_2_joint",       "wrist_3_joint" };
+// links with origin in the joints configured above.
+const std::string LINKS[] = { "shoulder_link", "upper_arm_link", "forearm_link",
+                              "wrist_1_link",  "wrist_2_link",   "wrist_3_link" };
 
 class RTPublisher : public URRTPacketConsumer
 {
@@ -29,6 +50,7 @@ private:
   Publisher joint_temperature_pub_;
   TransformBroadcaster transform_broadcaster_;
   std::vector<std::string> joint_names_;
+  std::vector<std::string> link_names_;
   std::string base_frame_;
   std::string tool_frame_;
   bool temp_only_;
@@ -54,6 +76,10 @@ public:
     for (auto const& j : JOINTS)
     {
       joint_names_.push_back(joint_prefix + j);
+    }
+    for (auto const& link : LINKS)
+    {
+      link_names_.push_back(joint_prefix + link);
     }
   }
 

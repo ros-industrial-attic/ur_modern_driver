@@ -1,3 +1,21 @@
+/*
+ * Copyright 2017, 2018 Simon Rasmussen (refactor)
+ *
+ * Copyright 2015, 2016 Thomas Timm Andersen (original version)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "ur_modern_driver/ros/hardware_interface.h"
 #include "ur_modern_driver/log.h"
 
@@ -18,9 +36,11 @@ void JointInterface::update(RTShared &packet)
 }
 
 const std::string WrenchInterface::INTERFACE_NAME = "hardware_interface::ForceTorqueSensorInterface";
-WrenchInterface::WrenchInterface(std::string tcp_link)
+WrenchInterface::WrenchInterface(std::string wrench_frame)
 {
-  registerHandle(hardware_interface::ForceTorqueSensorHandle("wrench", tcp_link, tcp_.begin(), tcp_.begin() + 3));
+  // the frame_id for the Wrench is set to what is configured as the "base frame".
+  // Refer to ros-industrial/ur_modern_driver#318 for the rationale.
+  registerHandle(hardware_interface::ForceTorqueSensorHandle("wrench", wrench_frame, tcp_.begin(), tcp_.begin() + 3));
 }
 
 void WrenchInterface::update(RTShared &packet)
@@ -31,7 +51,7 @@ void WrenchInterface::update(RTShared &packet)
 const std::string VelocityInterface::INTERFACE_NAME = "hardware_interface::VelocityJointInterface";
 VelocityInterface::VelocityInterface(URCommander &commander, hardware_interface::JointStateInterface &js_interface,
                                      std::vector<std::string> &joint_names, double max_vel_change)
-  : commander_(commander), max_vel_change_(max_vel_change), prev_velocity_cmd_({ 0, 0, 0, 0, 0, 0 })
+  : commander_(commander), prev_velocity_cmd_({ 0, 0, 0, 0, 0, 0 }), max_vel_change_(max_vel_change)
 {
   for (size_t i = 0; i < 6; i++)
   {

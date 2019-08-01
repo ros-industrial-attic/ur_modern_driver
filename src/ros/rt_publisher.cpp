@@ -1,3 +1,21 @@
+/*
+ * Copyright 2017, 2018 Simon Rasmussen (refactor)
+ *
+ * Copyright 2015, 2016 Thomas Timm Andersen (original version)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "ur_modern_driver/ros/rt_publisher.h"
 
 bool RTPublisher::publishJoints(RTShared& packet, Time& t)
@@ -19,6 +37,9 @@ bool RTPublisher::publishWrench(RTShared& packet, Time& t)
 {
   geometry_msgs::WrenchStamped wrench_msg;
   wrench_msg.header.stamp = t;
+  // Setting this to what is configured as the "base frame" through ROS parameters.
+  // Refer to ros-industrial/ur_modern_driver#318 for the rationale.
+  wrench_msg.header.frame_id = base_frame_;
   wrench_msg.wrench.force.x = packet.tcp_force[0];
   wrench_msg.wrench.force.y = packet.tcp_force[1];
   wrench_msg.wrench.force.z = packet.tcp_force[2];
@@ -80,7 +101,10 @@ bool RTPublisher::publishTemperature(RTShared& packet, Time& t)
   {
     sensor_msgs::Temperature msg;
     msg.header.stamp = t;
-    msg.header.frame_id = joint_names_[i];
+    // assumption: origins of the link frames are coincident with the origins
+    // of the joints. As the temperature sensors are assumed to be located in
+    // the joints, using the names of the link frames here should be acceptable.
+    msg.header.frame_id = link_names_[i];
     msg.temperature = packet.motor_temperatures[i];
 
     joint_temperature_pub_.publish(msg);
@@ -94,11 +118,10 @@ bool RTPublisher::publish(RTShared& packet)
   bool res = true;
   if (!temp_only_)
   {
-    res = publishJoints(packet, time) && publishWrench(packet, time) && publishTool(packet, time) &&
-          publishTransform(packet, time);
+    res = publishJoints(packet, time) && publishWrench(packet, time);
   }
 
-  return res && publishTemperature(packet, time);
+  return res && publishTool(packet, time) && publishTransform(packet, time) && publishTemperature(packet, time);
 }
 
 bool RTPublisher::consume(RTState_V1_6__7& state)
