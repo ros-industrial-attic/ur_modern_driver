@@ -45,6 +45,7 @@ class RTPublisher : public URRTPacketConsumer
 private:
   NodeHandle nh_;
   Publisher joint_pub_;
+  Publisher target_joint_pub_;
   Publisher wrench_pub_;
   Publisher tool_vel_pub_;
   Publisher joint_temperature_pub_;
@@ -56,6 +57,7 @@ private:
   bool temp_only_;
 
   bool publishJoints(RTShared& packet, Time& t);
+  bool publishTargetJoints(RTShared& packet, Time& t);
   bool publishWrench(RTShared& packet, Time& t);
   bool publishTool(RTShared& packet, Time& t);
   bool publishTransform(RTShared& packet, Time& t);
@@ -66,6 +68,7 @@ private:
 public:
   RTPublisher(std::string& joint_prefix, std::string& base_frame, std::string& tool_frame, bool temp_only = false)
     : joint_pub_(nh_.advertise<sensor_msgs::JointState>("joint_states", 1))
+    , target_joint_pub_(nh_.advertise<sensor_msgs::JointState>("target_joint_states", 1))
     , wrench_pub_(nh_.advertise<geometry_msgs::WrenchStamped>("wrench", 1))
     , tool_vel_pub_(nh_.advertise<geometry_msgs::TwistStamped>("tool_velocity", 1))
     , joint_temperature_pub_(nh_.advertise<sensor_msgs::Temperature>("joint_temperature", 1))

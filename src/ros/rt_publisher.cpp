@@ -33,6 +33,21 @@ bool RTPublisher::publishJoints(RTShared& packet, Time& t)
   return true;
 }
 
+bool RTPublisher::publishTargetJoints(RTShared& packet, Time& t)
+{
+  sensor_msgs::JointState joint_msg;
+  joint_msg.header.stamp = t;
+
+  joint_msg.name.assign(joint_names_.begin(), joint_names_.end());
+  joint_msg.position.assign(packet.q_target.begin(), packet.q_target.end());
+  joint_msg.velocity.assign(packet.qd_target.begin(), packet.qd_target.end());
+  joint_msg.effort.assign(packet.i_target.begin(), packet.i_target.end());
+
+  target_joint_pub_.publish(joint_msg);
+
+  return true;
+}
+
 bool RTPublisher::publishWrench(RTShared& packet, Time& t)
 {
   geometry_msgs::WrenchStamped wrench_msg;
@@ -121,7 +136,8 @@ bool RTPublisher::publish(RTShared& packet)
     res = publishJoints(packet, time) && publishWrench(packet, time);
   }
 
-  return res && publishTool(packet, time) && publishTransform(packet, time) && publishTemperature(packet, time);
+  return res && publishTargetJoints(packet, time) && publishTool(packet, time) && publishTransform(packet, time) &&
+         publishTemperature(packet, time);
 }
 
 bool RTPublisher::consume(RTState_V1_6__7& state)
