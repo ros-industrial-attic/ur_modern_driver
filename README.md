@@ -1,5 +1,5 @@
 # ur_modern_driver - Refactored
-[![Build Status](https://travis-ci.org/ros-industrial/ur_modern_driver.svg?branch=kinetic-devel)](https://travis-ci.org/ros-industrial/ur_modern_driver)
+[![Build Status](https://travis-ci.com/ros-industrial/ur_modern_driver.svg?branch=kinetic-devel)](https://travis-ci.com/ros-industrial/ur_modern_driver)
 [![license - apache 2.0](https://img.shields.io/:license-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
