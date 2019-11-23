@@ -66,10 +66,7 @@
   <run_depend>tf</run_depend>
   <run_depend>realtime_tools</run_depend>
 
-
-  <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
-
+    <deprecated>This package has been deprecated. Users of CB3 and e-Series controllers should migrate to ur_robot_driver.</deprecated>
   </export>
 </package>
