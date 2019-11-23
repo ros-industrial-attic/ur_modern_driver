@@ -1,11 +1,23 @@
-# ur_modern_driver - Refactored
+# ur_modern_driver - Deprecated
+
 [![Build Status](https://travis-ci.com/ros-industrial/ur_modern_driver.svg?branch=kinetic-devel)](https://travis-ci.com/ros-industrial/ur_modern_driver)
 [![license - apache 2.0](https://img.shields.io/:license-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
-
 
 [![support level: community](https://img.shields.io/badge/support%20level-community-lightgray.png)](http://rosindustrial.org/news/2016/10/7/better-supporting-a-growing-ros-industrial-software-platform)
 
 A new driver for the UR3/UR5/UR10 robot arms from Universal Robots. It is designed to replace the old driver transparently, while solving some issues, improving usability as well as enabling compatibility  of ros_control.
+
+
+## Deprecation notice
+
+This package has been deprecated. It will not see any further development or new features.
+
+Users with CB3 and e-Series controllers should use [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver).
+
+As `ur_robot_driver` is not compatible with CB2 and older controllers, users with those controllers may still use this package.
+
+Refer to the [announcement on ROS Discourse](https://discourse.ros.org/t/deprecation-of-ur-modern-driver/11629) for more information.
+
 
 ## Improvements
 
