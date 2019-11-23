@@ -1,21 +1,15 @@
-# ur_modern_driver
+# ur_modern_driver - Deprecated
 
 
 ## Deprecation notice
 
 **note**: the `master` branch contains a deprecated version of this driver, kept for archival purposes only.
 
-The `master` version of `ur_modern_driver` is **not compatible** with newer controller and Polyscope versions, and should not be used with those.
+`ur_modern_driver` has been deprecated completely in favour of [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver).
 
-We recommend anyone using Polyscope versions 3 and newer to use the `kinetic-devel` branch instead.
+Users with CB3 and e-Series controllers should use `ur_robot_driver`.
 
-If building this package from source, the following will checkout the `kinetic-devel` branch:
-
-```bash
-$ git clone -b kinetic-devel https://github.com/ros-industrial/ur_modern_driver.git
-```
-
-`kinetic-devel` will be made the default branch in this repository in the near future.
+Refer to the [announcement on ROS Discourse](https://discourse.ros.org/t/deprecation-of-ur-modern-driver/11629) for more information.
 
 
 ## Overview
