@@ -3,7 +3,7 @@
 <package format="2">
   <name>ur_modern_driver</name>
   <version>0.1.0</version>
-  <description>The new driver for Universal Robots UR3, UR5 and UR10 robots with CB2 and CB3 controllers.</description>
+  <description>Deprecated ROS 1 driver for CB1 and CB2 controllers with UR5 or UR10 robots from Universal Robots.</description>
   <author>Thomas Timm Andersen</author>
   <author>Simon Rasmussen</author>
   <maintainer email="g.a.vanderhoorn@tudelft.nl">G.A. vd. Hoorn (TU Delft Robotics Institute)</maintainer>
