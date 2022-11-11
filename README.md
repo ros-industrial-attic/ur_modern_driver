@@ -11,6 +11,7 @@ Users with CB3 and e-Series controllers should use `ur_robot_driver`.
 
 Refer to the [announcement on ROS Discourse](https://discourse.ros.org/t/deprecation-of-ur-modern-driver/11629) for more information.
 
+<details><summary>Click to see original readme</summary>
 
 ## Overview
 
@@ -175,3 +176,4 @@ Please cite the following report if using this driver
 
 The report can be downloaded from http://orbit.dtu.dk/en/publications/optimizing-the-universal-robots-ros-driver(20dde139-7e87-4552-8658-dbf2cdaab24b).html
 
+</details>
