@@ -21,7 +21,7 @@
   <arg name="servoj_time_waiting" default="0.001" />
   <arg name="max_waiting_time" default="2.0" />
   <arg name="servoj_gain" default="100." />
-  <arg name="servoj_lookahead_time" default="1." />
+  <arg name="servoj_lookahead_time" default=".1" />
   <arg name="max_joint_difference" default="0.01" />
   <arg name="base_frame" default="$(arg prefix)base" />
   <arg name="tool_frame" default="$(arg prefix)tool0_controller" />
