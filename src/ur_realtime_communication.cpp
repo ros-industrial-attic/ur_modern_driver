@@ -85,6 +85,8 @@ void UrRealtimeCommunication::halt() {
 }
 
 void UrRealtimeCommunication::addCommandToQueue(std::string inp) {
+	std::unique_lock<std::mutex> lock(mutex_);
+
 	int bytes_written;
 	if (inp.back() != '\n') {
 		inp.append("\n");

@@ -63,9 +63,7 @@ protected:
 	ros::NodeHandle nh_;
 	actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> as_;
 	actionlib::ServerGoalHandle<control_msgs::FollowJointTrajectoryAction> goal_handle_;
-	bool has_goal_;
-	control_msgs::FollowJointTrajectoryFeedback feedback_;
-	control_msgs::FollowJointTrajectoryResult result_;
+
 	ros::Subscriber speed_sub_;
 	ros::Subscriber urscript_sub_;
 	ros::ServiceServer io_srv_;
@@ -81,6 +79,20 @@ protected:
 	std::thread* ros_control_thread_;
 	boost::shared_ptr<ros_control_ur::UrHardwareInterface> hardware_interface_;
 	boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
+
+	// Thread semantics:
+	// * cancelCB and goalCB can be called simultaneously by the action server.
+	//   We prevent that by locking the as_mutex_.
+	// * The has_goal_ variable is protected by the goal_mutex_, as it is
+	//   accessed by trajThread() and the callbacks.
+
+	std::mutex goal_mutex_;
+	bool has_goal_;
+	std::thread traj_thread_;
+	control_msgs::FollowJointTrajectoryFeedback feedback_;
+	control_msgs::FollowJointTrajectoryResult result_;
+
+	std::mutex as_mutex_;
 
 public:
 	RosWrapper(std::string host, int reverse_port) :
@@ -222,20 +234,28 @@ public:
 
 	}
 private:
-	void trajThread(std::vector<double> timestamps,
+	void trajThread(
+			std::vector<double> timestamps,
 			std::vector<std::vector<double> > positions,
-			std::vector<std::vector<double> > velocities) {
+			std::vector<std::vector<double> > velocities)
+	{
+		bool finished = robot_.doTraj(timestamps, positions, velocities);
 
-		robot_.doTraj(timestamps, positions, velocities);
-		if (has_goal_) {
+		if (finished)
+		{
+			std::unique_lock<std::mutex> lock(goal_mutex_);
 			result_.error_code = result_.SUCCESSFUL;
 			goal_handle_.setSucceeded(result_);
 			has_goal_ = false;
 		}
 	}
+
 	void goalCB(
 			actionlib::ServerGoalHandle<
 					control_msgs::FollowJointTrajectoryAction> gh) {
+
+		std::unique_lock<std::mutex> asLock(as_mutex_);
+
 		std::string buf;
 		print_info("on_goal");
 		if (!robot_.sec_interface_->robot_state_->isReady()) {
@@ -283,16 +303,27 @@ private:
 
 		actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction>::Goal goal =
 				*gh.getGoal(); //make a copy that we can modify
-		if (has_goal_) {
-			print_warning(
-					"Received new goal while still executing previous trajectory. Canceling previous trajectory");
-			has_goal_ = false;
-			robot_.stopTraj();
-			result_.error_code = -100; //nothing is defined for this...?
-			result_.error_string = "Received another trajectory";
-			goal_handle_.setAborted(result_, result_.error_string);
-			std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+		{
+			std::unique_lock<std::mutex> lock(goal_mutex_);
+			if (has_goal_) {
+				print_warning(
+						"Received new goal while still executing previous trajectory. Canceling previous trajectory");
+				has_goal_ = false;
+				robot_.stopTraj();
+
+				result_.error_code = -100; //nothing is defined for this...?
+				result_.error_string = "Received another trajectory";
+				goal_handle_.setAborted(result_, result_.error_string);
+				std::this_thread::sleep_for(std::chrono::milliseconds(250));
+			}
 		}
+
+		if(traj_thread_.joinable())
+			traj_thread_.join();
+
+		std::unique_lock<std::mutex> lock(goal_mutex_);
+
 		goal_handle_ = gh;
 		if (!validateJointNames()) {
 			std::string outp_joint_names = "";
@@ -373,21 +404,26 @@ private:
 
 		goal_handle_.setAccepted();
 		has_goal_ = true;
-		std::thread(&RosWrapper::trajThread, this, timestamps, positions,
-				velocities).detach();
+		traj_thread_ = std::thread(&RosWrapper::trajThread, this, timestamps, positions,
+			velocities);
 	}
 
 	void cancelCB(
 			actionlib::ServerGoalHandle<
 					control_msgs::FollowJointTrajectoryAction> gh) {
 		// set the action state to preempted
+
+		std::unique_lock<std::mutex> asLock(as_mutex_);
+		std::unique_lock<std::mutex> lock(goal_mutex_);
+
 		print_info("on_cancel");
 		if (has_goal_) {
 			if (gh == goal_handle_) {
-				robot_.stopTraj();
 				has_goal_ = false;
+				robot_.stopTraj();
 			}
 		}
+
 		result_.error_code = -100; //nothing is defined for this...?
 		result_.error_string = "Goal cancelled by client";
 		gh.setCanceled(result_);
