@@ -50,7 +50,7 @@ private:
         res = commander_.setAnalogOut(req.pin, req.state);
         break;
       case ur_msgs::SetIO::Request::FUN_SET_TOOL_VOLTAGE:
-        res = commander_.setToolVoltage(static_cast<uint8_t>(req.state));
+        res = commander_.setToolVoltage(std::lround(req.state));
         break;
       case ur_msgs::SetIO::Request::FUN_SET_FLAG:
         res = commander_.setFlag(req.pin, flag);

@@ -46,7 +46,7 @@ bool URCommander::uploadProg(const std::string &s)
 
 bool URCommander::setToolVoltage(uint8_t voltage)
 {
-  if (voltage != 0 || voltage != 12 || voltage != 24)
+  if (voltage != 0 && voltage != 12 && voltage != 24)
     return false;
 
   std::ostringstream out;
